@@ -32,7 +32,7 @@ real mode -> protected mode
   - jump to C function
   - idt and isrs
 
-3. kernel gets control at entry
+kernel gets control at entry
 
   assembly
     - writing custom bootloader
@@ -50,13 +50,20 @@ intending to do everything else in c.
 - print (text output)
 - gdt and idt
 - memory manageement (paging, heap)
-- pit and keyboard drivers
+- pit and keyboard driver then I can support multiple fs later.
 - schedule / multitasking
   - probably avoid multitasking and make it single-threaded and non-preemptive
 - shell (using my ishell but prob have to change readline)
 - system calls
 
 full kernel privileges no separation between user programs and kernel code.
+
+file system
+
+using fat since its simple. probably going with FAT12 before implemtning other file systems (FS) then I can support multiple fs later.
+
+http://www.fysnet.net/docs/fatgen103.pdf
+https://forum.osdev.org/viewtopic.php?t=20861
 
 my goal at the end of this os is to port python.
 
