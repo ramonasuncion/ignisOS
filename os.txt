@@ -17,6 +17,7 @@ developing on debian
 setup
   - sudo apt install build-essential gcc-multilib nasm make binutils
   - sudo apt install qemu-utils qemu-system-x86 qemu-system-gui
+  - sudo apt install python-is-python3
 
 bootloader
 
