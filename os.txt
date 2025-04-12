@@ -2,7 +2,7 @@ planning hobby kernel
 
 this is a multiyear project.
 
-x86 monolithic OS
+64 bit x86 monolithic OS
 
 - compiler : gcc cross-compiler
 - assembler: nasm
