@@ -15,7 +15,7 @@ $(OS_IMAGE): $(BOOT_BIN) | $(BUILD_DIR)
 	dd if=$(BOOT_BIN) of=$(OS_IMAGE) conv=notrunc
 
 run: $(OS_IMAGE)
-	$(QEMU) -drive format=raw,file=$(OS_IMAGE),if=floppy -display curses -monitor stdio -no-reboot -no-shutdown
+	$(QEMU) -drive format=raw,file=$(OS_IMAGE),if=floppy -monitor stdio -no-reboot -no-shutdown
 
 debug: $(OS_IMAGE)
 	$(QEMU) -drive format=raw,file=$(OS_IMAGE),if=floppy -monitor stdio -d int,guest_errors,cpu -no-reboot -no-shutdown
