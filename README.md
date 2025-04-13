@@ -4,6 +4,8 @@ A hobby osdev project. I intend to develop a x64 monolothic OS.
 
 ## Demo
 
+![OS](./demo.png)
+
 ## Deps
 
 You will need the following tools:
