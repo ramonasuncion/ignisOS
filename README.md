@@ -25,6 +25,7 @@ sudo apt install build-essential gcc-multilib nasm make binutils
 ## Debugging
 
 - `gdb`
+- `xxd` - see the binary data (xxd boot.bin)
 
 Developing on Debian:
 
