@@ -28,11 +28,13 @@ sudo apt install build-essential gcc-multilib nasm make binutils
 
 - `gdb`
 - `xxd` - see the binary data (xxd boot.bin)
+- `spellcheck` -  a static analysis tool for shell scripts
 
 Developing on Debian:
 
 ```sh
 sudo apt install gdb
+sudo apt install shellcheck
 ```
 
 ## Contribs
