@@ -1,6 +1,6 @@
 # IgnisOS
 
-A hobby osdev project. I intend to develop a x86_64 monolothic OS.
+A hobby osdev project. I intend to develop a x64 monolothic OS.
 
 ## Demo
 
@@ -36,12 +36,36 @@ sudo apt install gdb
 
 I welcome contributions to the project. Please read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## Plans
+## Tasks
 
-- FAT12 FS + multiple FS
-- Full kernel privileges
-- Schedule / Multitasking
-  - Single-threaded and non-preemptive
-- Basic shell
-- System calls
+Minimal Kernel
+
+- [x] Boot to long mode
+- [x] Setup GDT, paging, and 64-bit mode
+- [ ] Disk loading (stage 2 + kernel)
+- [ ] Memory mapping and basic protections
+- [ ] Timer (delays and scheduling tasks e.g., PIT or HPET)
+- [ ] Memory allocation
+- [ ] Print funciton in x64
+- [ ] Keyboard input
+- [ ] VGA-based text UI
+- [ ] Basic shell
+- [ ] Built-in text editor
+- [ ] Math / Drawing library (+ demo programs)
+- [ ] Sound output
+- [ ] File system (FAT12)
+- [ ] Mouse support
+- [ ] Font system
+
+## Brainstorming
+
+- Flat memory model, identity-mapped (virtual addr = physical addr)
+- Single user, kernel-only (Ring 0)
+- Non premptive
+- Text-based UI (Resizing available)
+- Basic networking stack (IP + UDP)
+- FAT12 file system
+- Basic scheduler (round robin)
+- Minimal memory protections
+- Scripting
 
