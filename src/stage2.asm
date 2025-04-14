@@ -28,7 +28,9 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
-KERNEL_SECTORS       equ 0x02           ; number of sectors to read
+KERNEL_SECTORS       equ 0xA            ; number of sectors to read
+
+; ls -l build/kernel.bin ceil(size / 512)
 
 start:
     xor      ax, ax                     ; zero ax
@@ -38,26 +40,18 @@ start:
     mov      si, stage2_msg
     call     print_string
 
-    ; fixme: I'm trying to load data to address 0x100000
-    ; (1MB) while in 16-bit mode.
+    mov      bx, 0x9000                 ; temporary buffer
+    mov      dh, KERNEL_SECTORS         ; number of sectors to read
+    mov      dl, [boot_drive]           ; boot drive number
+    call     disk_load
 
-    ; disk loading
-    ; mov bx, KERNEL_LOAD_ADDR
-    ; mov ax, 0x1000 ; segment:offset
-    ; mov es, ax
-    ; mov bx, 0x0000
-    ; mov dh, KERNEL_SECTORS
-    ; mov dl, [boot_drive]
-    ; call disk_load
-
-    ; mov si, kernel_loaded_msg
-    ; call print_string
+    mov      si, kernel_loaded_msg
+    call     print_string
 
     lgdt     [gdt_descriptor]           ; load gdt
 
     cli                                 ; disable interrupts before mode switch
 
-                                        ; https://wiki.osdev.org/Protected_Mode
     mov      eax, cr0
     or       eax, 0x1                   ; set pe bit (bit 0) in cr0
     mov      cr0, eax
@@ -156,8 +150,6 @@ setup_paging:
     ret
 
 enable_long_mode:
-    ; https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf - 3A section 9.8.5
-
     ; enable pae
     mov      eax, cr4
     or       eax, CR4_PAE               ; set pae bit
@@ -188,26 +180,10 @@ long_mode_start:
 
     mov      rsp, 0x90000               ; setup 64-bit stack
 
-    ; https://helparchive.huntertur.net/document/34458
-    ; following code from: https://wiki.osdev.org/Entering_Long_Mode_Directly
-
-    ; change background
-    ; mov edi, 0xB8000                  ; vga text buffer
-    ; mov rcx, 500
-    ; mov rax, 0x1F201F201F201F20
-    ; rep stosq
-
-    ; ; display "Hello World!"
-    ; mov edi, 0x00b8000
-
-    ; mov rax, 0x1F6C1F6C1F651F48
-    ; mov [edi],rax
-
-    ; mov rax, 0x1F6F1F571F201F6F
-    ; mov [edi + 8], rax
-
-    ; mov rax, 0x1F211F641F6C1F72
-    ; mov [edi + 16], rax
+    mov      rsi, 0x9000                ; source (temp buffer)
+    mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
+    mov      rcx, KERNEL_SECTORS * 512  ; size in bytes (sectors * 512)
+    rep      movsb                      ; copy byte by byte
 
     mov      rax, KERNEL_LOAD_ADDR      ; load kernel
     jmp      rax                        ; jump to kernel entry point
