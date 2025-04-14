@@ -13,12 +13,7 @@ OS_IMAGE = $(BUILD_DIR)/os.img
 CC = x86_64-elf-gcc
 LD = x86_64-elf-ld
 
-ifeq ($(UNAME), Linux)
-	CC = gcc
-	LD = ld
-endif
-
-CFLAGS = -v -m64 -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles
+CFLAGS = -v -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles -g # -mcmodel=kernel
 KERNEL_OBJ = $(BUILD_DIR)/kernel.o
 
 QEMU = qemu-system-x86_64
