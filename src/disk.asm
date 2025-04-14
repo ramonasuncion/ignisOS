@@ -29,12 +29,3 @@ disk_error:
 disk_error_msg:
     db       'Disk read error!', 0
 
-; TODO: https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)#64-bit_Addressing_Extensions
-
-; first stage use basic INT 13h (Set AH = 02h) to load second stage
-; second stage use basic INT 13h (Set AH = 0x41) Extended with LBA addressing to load in kernel.
-
-; having problems because of real-mode segment:offset accessing higher memory address and CHS address is limited in general
-
-; disk_load_ext:
-
