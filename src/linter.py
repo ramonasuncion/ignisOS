@@ -21,15 +21,15 @@ def parse_instr(line, cmt_char=';'):
     code, _, cmt = s_line.partition(cmt_char)
     cmt = cmt.strip() if cmt else ''
     tokens = code.strip().split(None, 1)
-    instr = tokens[0] if tokens else ''
+    mnemonic = tokens[0] if tokens else ''
     ops = tokens[1] if len(tokens) > 1 else ''
 
-    return ['i', '', instr, ops, cmt]
+    return ['i', '', mnemonic, ops, cmt]
 
 
-def format_instr(instr, operands, cmt, col=40):
+def format_instr(mnemonic, operands, cmt, col=40):
     # <TAB><instr><padding><operand><cmt>
-    line = f"\t{instr:<8} {operands}".rstrip()
+    line = f"\t{mnemonic:<8} {operands}".rstrip()
     if cmt:
         visual_len = len(line.expandtabs(4))
         padding = max(1, col - visual_len)
@@ -44,7 +44,7 @@ def align_file(file_path, output_path=None, cmt_char=';', col=40):
     result_lines = []
 
     for line in lines:
-        typ, label, instr, ops, cmt = parse_instr(line, cmt_char)
+        typ, label, mnemonic, ops, cmt = parse_instr(line, cmt_char)
         # print(f"{typ} {label} {instr} {ops} {cmt}")
 
         line = line.rstrip()
@@ -73,7 +73,7 @@ def align_file(file_path, output_path=None, cmt_char=';', col=40):
             #spaces = ' ' * max(1, col - len(code))
             #aligned_line = f"{code}{spaces}{cmt_char} {comment.strip()}"
         elif typ == "i":
-            instr = format_instr(instr, ops, cmt, col)
+            instr = format_instr(menmonic, ops, cmt, col)
             result_lines.append(instr)
         #else:
         #    aligned_line = line.rstrip()
