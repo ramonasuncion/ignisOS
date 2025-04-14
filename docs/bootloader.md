@@ -16,4 +16,4 @@ The BIOS loads the bootloader's code into address 0x7C00.
 
 The MBR ust end with the **boot signature** `0x55AA` at the last two bytes.
 
-
+Load the kernel as ELF from disk. The stage 1 bootloader 512 raw binary (flat binary).
