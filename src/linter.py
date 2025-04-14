@@ -45,48 +45,28 @@ def align_file(file_path, output_path=None, cmt_char=';', col=40):
 
     for line in lines:
         typ, label, mnemonic, ops, cmt = parse_instr(line, cmt_char)
-        # print(f"{typ} {label} {instr} {ops} {cmt}")
 
         line = line.rstrip()
 
-        #indent = get_ident_level(line)
-        #print(f"{indent}: {line}")
-
-        # if line.strip() == "":
         if typ == "b":
             blank_line += 1
             if blank_line <= 2:
-                #aligned_lines.append("")
                 result_lines.append("")
             continue
         else:
             blank_line = 0
 
-        # if re.match(r"^\s*[\w.]+:$", line):
         if typ == "l":
             result_lines.append(label)
-        #elif cmt_char in line:
         elif typ == "c":
             result_lines.append(cmt)
-            #code, cmt = line.split(comment_char, 1)
-            #code = code.rstrip()
-            #spaces = ' ' * max(1, col - len(code))
-            #aligned_line = f"{code}{spaces}{cmt_char} {comment.strip()}"
         elif typ == "i":
-            instr = format_instr(menmonic, ops, cmt, col)
+            instr = format_instr(mnemonic, ops, cmt, col)
             result_lines.append(instr)
-        #else:
-        #    aligned_line = line.rstrip()
-        # aligned_lines.append(aligned_line)
-
 
     while result_lines and result_lines[-1].strip() == '':
         result_lines.pop()
     result_lines.append('')
-
-    #while len(lines) > 0 and lines[-1].strip() == "":
-    #    lines.pop()
-    #lines.append("")
 
     output = '\n'.join(result_lines) + '\n'
 
