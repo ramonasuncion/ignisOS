@@ -1,5 +1,6 @@
 ASM = nasm
 BUILD_DIR = build
+UNAME := $(shell uname)
 SRC_DIR = .
 
 STAGE1_SRC = stage1.asm
@@ -11,6 +12,12 @@ OS_IMAGE = $(BUILD_DIR)/os.img
 
 CC = x86_64-elf-gcc
 LD = x86_64-elf-ld
+
+ifeq ($(UNAME), Linux)
+	CC = gcc
+	LD = ld
+endif
+
 CFLAGS = -v -m64 -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles
 KERNEL_OBJ = $(BUILD_DIR)/kernel.o
 
