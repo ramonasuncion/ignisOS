@@ -1,5 +1,8 @@
-void kernel_main(void)
-{
-  char* video_memory = (char*) 0xb8000;
-  *video_memory = 'X';
+void kernel_main(void) {
+  volatile char *vga = (volatile char*)0xB8000;
+  vga[0] = 'O';
+  vga[1] = 0x0A;
+  vga[2] = 'K';
+  vga[3] = 0x0A;
+  while(1) {}
 }
