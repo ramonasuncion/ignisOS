@@ -47,7 +47,7 @@ Minimal Kernel
 
 - [x] Boot to long mode
 - [x] Setup GDT, paging, and 64-bit mode
-- [ ] Disk loading (stage 2 + kernel)
+- [x] Disk loading (stage 2 + kernel)
 - [ ] Memory mapping and basic protections
 - [ ] Timer (delays and scheduling tasks e.g., PIT or HPET)
 - [ ] Memory allocation
