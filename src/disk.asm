@@ -1,12 +1,15 @@
 ; dl = drive number is set as input to disk_load
 ; es:bx = buffer pointer is set as input as well
+; sector 1: Bootloader (stage1)
+; sector 2: Second stage
+; sector 9: Kernel
 disk_load:
     push     dx
 
     mov      ah, 0x2                    ; read mode
     mov      al, dh                     ; read dh number of sectors
-    mov      cl, 0x02                   ; start from sector 2 (sector 1 is our boot loader)
-    mov      ch, 0x00                   ; cylinder 1
+    ; cl is already set by caller (starting sector)
+    mov      ch, 0x00                   ; cylinder 0
     mov      dh, 0x00                   ; head 0
 
     int      0x13                       ; bios interrupt

@@ -26,6 +26,7 @@ start:
     mov      dh, SECOND_STAGE_SECTORS
     ; 8 sectors * 512 bytes = 4,096 bytes (4K)
     mov      dl, [boot_drive]
+    mov      cl, 0x02                   ; load sector 2
     call     disk_load
 
     jmp      SECOND_STAGE_LOAD_ADDR

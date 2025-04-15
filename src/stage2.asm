@@ -30,7 +30,10 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
 KERNEL_SECTORS       equ 0xA            ; number of sectors to read
 
-; ls -l build/kernel.bin ceil(size / 512)
+; ls -l build/kernel.bin # ceil(size / 512)
+; x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
+; x86_64-elf-nm build/kernel.elf | grep kernel_main
+; ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
 
 start:
     xor      ax, ax                     ; zero ax
@@ -43,6 +46,7 @@ start:
     mov      bx, 0x9000                 ; temporary buffer
     mov      dh, KERNEL_SECTORS         ; number of sectors to read
     mov      dl, [boot_drive]           ; boot drive number
+    mov      cl, 0x09
     call     disk_load
 
     mov      si, kernel_loaded_msg
