@@ -184,11 +184,6 @@ long_mode_start:
 
     mov      rsp, 0x90000               ; setup 64-bit stack
 
-    mov edi, 0xB8000
-    mov rcx, 500                        ; clearing uint64_t, we put the count as Count/4
-    mov rax, 0x0720072007200720         ; set the screen to: blue background, white foreground, blank spaces.
-    rep stosq                           ; clear entire screen
-
     mov      rsi, 0x9000                ; source (temp buffer)
     mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
     mov      rcx, KERNEL_SECTORS * 512  ; size in bytes (sectors * 512)
