@@ -1,3 +1,4 @@
 1. https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf - 3A section 9.8.5
 2. https://helparchive.huntertur.net/document/34458
 3. https://wiki.osdev.org/Entering_Long_Mode_Directly
+4. https://gitlab.sdu.dk/daniel/QuasiOS-64-bit/-/blob/master/bootloaders/LongModeDirectly.asm?ref_type=heads
