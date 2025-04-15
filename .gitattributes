@@ -1,0 +1,6 @@
+*.sh text eol=lf
+Makefile text eol=lf
+*.img binary
+*.bin binary
+*.asm diff=asm
+*.ld text
