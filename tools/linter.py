@@ -1,7 +1,7 @@
 import argparse
 import re
 
-DEBUG = False
+DEBUG = True
 TABSIZE = 4
 
 
@@ -11,10 +11,12 @@ def get_indent_level(line_of_code):
 
 
 def check_mixed_indentation(lines):
+    # TODO: Check for tabs / spaces depending on flag.
     for idx, line in enumerate(lines, 1):
-        if re.match(r"^ +", line):
-            print(f"Warning: Line {idx} starts with spaces.")
-        elif re.match(r"^ *\t", line):
+        #if re.match(r"^ +", line):
+        #    print(f"Warning: Line {idx} starts with spaces.")
+        #elif
+        if re.match(r"^ *\t", line):
             print(f"Warning: Line {idx} has mixed spaces and tabs.")
 
 
@@ -38,7 +40,8 @@ def parse_instr(line, cmt_char=";"):
         return ["b", "", "", "", ""]
 
     # comment only
-    if s_line.startswith(cmt_char):
+    if s_line.lstrip().startswith(cmt_char):
+        print(f"Indent: {indentation}, Comment: {s_line[1:].strip()}")
         return ["c", indentation, "", "", s_line[1:].strip()]
 
     # label
@@ -56,9 +59,6 @@ def parse_instr(line, cmt_char=";"):
 
 def format_line(mnemonic, operands, cmt, col=40, indent=True, keyword=False):
     prefix = " " * TABSIZE if indent else ""
-
-    if DEBUG:
-        print(f"Current prefix: {prefix}")
 
     if keyword:
         line = f"{prefix}{mnemonic:<20} {operands}".rstrip()
@@ -113,10 +113,12 @@ def align_file(file_path, output_path=None, cmt_char=";", col=40, tabsize=4):
             )
             result_lines.append(keyword_line)
         elif typ == "c":
-            indent_level = indent_or_label
-            indent_spaces = min(indent_level, TABSIZE) * " "
-            comment_line = f"{indent_spaces}; {cmt}"
-            result_lines.append(comment_line)
+            #indent_level = indent_or_label
+            #indent_spaces = min(indent_level, TABSIZE) * " "
+            #cmt = cmt.lstrip()
+            #comment_line = f"{indent_spaces}; {cmt}"
+            #result_lines.append(comment_line)
+            result_lines.append(cmt)
         elif typ == "i":
             instr = format_line(mnemonic, ops, cmt, col, indent=True, keyword=False)
             result_lines.append(instr)
@@ -131,7 +133,8 @@ def align_file(file_path, output_path=None, cmt_char=";", col=40, tabsize=4):
         with open(output_path, "w") as f:
             f.write(output)
     else:
-        print(output)
+        if not DEBUG:
+            print(output)
 
 
 def main():
