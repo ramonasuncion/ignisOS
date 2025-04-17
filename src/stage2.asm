@@ -184,6 +184,8 @@ long_mode_start:
 
     mov      rsp, 0x90000               ; setup 64-bit stack
 
+    ; TODO:  don't enable the interrupts unless I set up a 64-bit IDT of course.
+
     mov      rsi, 0x9000                ; source (temp buffer)
     mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
     mov      rcx, KERNEL_SECTORS * 512  ; size in bytes (sectors * 512)
@@ -204,5 +206,5 @@ stage2_msg:
 kernel_loaded_msg:
     db       'Kernel loaded...', 13, 10, 0
 
-    boot_drive db 0
+boot_drive db 0
 
