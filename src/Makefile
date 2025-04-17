@@ -7,7 +7,7 @@ STAGE2_SRC = stage2.asm
 
 STAGE1_BIN = $(BUILD_DIR)/stage1.bin
 STAGE2_BIN = $(BUILD_DIR)/stage2.bin
-OS_IMAGE = $(BUILD_DIR)/os.img
+OS_IMAGE = $(BUILD_DIR)/ignis.img
 
 CC = x86_64-elf-gcc
 LD = x86_64-elf-ld
