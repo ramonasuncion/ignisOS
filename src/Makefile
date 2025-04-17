@@ -1,9 +1,10 @@
 ASM = nasm
 BUILD_DIR = build
+BOOT_DIR = boot
 SRC_DIR = .
 
-STAGE1_SRC = stage1.asm
-STAGE2_SRC = stage2.asm
+STAGE1_SRC = $(BOOT_DIR)/stage1.asm
+STAGE2_SRC = $(BOOT_DIR)/stage2.asm
 
 STAGE1_BIN = $(BUILD_DIR)/stage1.bin
 STAGE2_BIN = $(BUILD_DIR)/stage2.bin
@@ -28,11 +29,11 @@ $(BUILD_DIR)/kernel.bin: $(KERNEL_OBJ) | $(BUILD_DIR)
 	$(LD) -o $(BUILD_DIR)/kernel.elf $< -T link.ld
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel.elf $@
 
-$(STAGE1_BIN): $(STAGE1_SRC) disk.asm print.asm | $(BUILD_DIR)
-	$(ASM) -f bin $(STAGE1_SRC) -o $(STAGE1_BIN)
+$(STAGE1_BIN): $(STAGE1_SRC) $(BOOT_DIR)/disk.asm $(BOOT_DIR)/print.asm | $(BUILD_DIR)
+	$(ASM) -I$(BOOT_DIR)/ -f bin $(STAGE1_SRC) -o $(STAGE1_BIN)
 
-$(STAGE2_BIN): $(STAGE2_SRC) disk.asm print.asm | $(BUILD_DIR)
-	$(ASM) -f bin $(STAGE2_SRC) -o $(STAGE2_BIN)
+$(STAGE2_BIN): $(STAGE2_SRC) $(BOOT_DIR)/disk.asm $(BOOT_DIR)/print.asm | $(BUILD_DIR)
+	$(ASM) -I$(BOOT_DIR)/ -f bin $(STAGE2_SRC) -o $(STAGE2_BIN)
 
 # 1.44 MB floppy, 18 sectors, each 512 bytes
 $(OS_IMAGE): $(STAGE1_BIN) $(STAGE2_BIN) $(BUILD_DIR)/kernel.bin | $(BUILD_DIR)
