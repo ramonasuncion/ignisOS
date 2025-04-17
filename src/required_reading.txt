@@ -5,6 +5,4 @@
 5. https://wiki.osdev.org/Entering_Long_Mode_Directly
 6. https://wiki.osdev.org/Creating_a_64-bit_kernel
 7. https://wiki.osdev.org/Monolithic_Kernel
-
-
 https://github.com/stevej/osdev/tree/master
