@@ -32,8 +32,9 @@ KERNEL_SECTORS       equ 0xA            ; number of sectors to read
 
 ; ls -l build/kernel.bin # ceil(size / 512)
 ; x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
-; x86_64-elf-nm build/kernel.elf | grep kernel_main
+; x86_64-elf-nm build/kernel.elf | grep kmain
 ; ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
+;  x86_64-elf-nm build/kernel.elf
 
 start:
     xor      ax, ax                     ; zero ax
