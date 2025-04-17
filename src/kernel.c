@@ -1,23 +1,32 @@
-// kprint
+#include <stdint.h>
 
-// idt -  Having a working and reliable interrupt/exception handling system that can dump the contents of the registers (and perhaps the address of the fault) will be very useful.
-// https://wiki.osdev.org/Interrupt_Descriptor_Table#:~:text=The%20Interrupt%20Descriptor%20Table%20(IDT,(one%20per%20interrupt%20vector).
-// https://wiki.osdev.org/Interrupts
+// https://github.com/dreamportdev/Osdev-Notes/blob/master/02_Architecture/05_InterruptHandling.md
 // https://forum.osdev.org/download/file.php?id=3406
+// https://wiki.osdev.org/What_Order_Should_I_Make_Things_In%3F
+// https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_x86-64
+// https://wiki.osdev.org/Interrupts_Tutorial#Pre-requisites
+// https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_x86-64
 
-// Outputting to a serial port will save you a lot of debugging time. You don't have to fear losing information due to scrolling. You will be able to test your OS from a console, filter interesting debug messages, and automatize some tests.
+struct interrupt_descriptor
+{
+  uint16_t    isr_low;
+  uint16_t    kernel_cs;
+  uint8_t     ist;
+  uint8_t     attributes;
+  uint16_t    isr_mid;
+  uint32_t    isr_high;
+  uint32_t    reserved;
+} __attribute__((packed));
 
-//  Plan your memory map (virtual, and physical) : decide where you want the data to be -  https://forum.osdev.org/viewtopic.php?t=57323 I want identity mapping but is that the best?
-// https://wiki.osdev.org/Memory_management
-
-//  The heap: allocating memory at runtime (malloc and free) is almost impossible to go without. It should be implemented as soon as possible.
-
-//  Once those steps are completed, whether you'll try to have a working GUI before you have a filesystem, multitasking or module-loading is completely up to you. Try to sketch out what is likely to depend on what, and do things in 'least dependent first' order.
-
-//  For instance, the GUI could depend on the filesystem to load bitmaps or resources, but you don't necessarily need bitmaps in your very first GUI. Good advice in such a case is to design the interface of the filesystem first (be it open/close/read/write or something else), and then go on with whatever you prefer, respecting the interface on both sides.
-
+void init_idt()
+{
+}
 
 void kmain()
 {
-  while (1) { }
+
+
+  while (1) {
+    __asm__ volatile("hlt");
+  }
 }
