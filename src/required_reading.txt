@@ -1,8 +1,0 @@
-1. https://wiki.osdev.org/Setting_Up_Long_Mode#x86_or_x86-64
-2. https://wiki.osdev.org/Stack#Stack_example_on_the_X86_architecture
-3. https://wiki.osdev.org/Global_Descriptor_Table
-4. https://wiki.osdev.org/Paging#64-bit_Paging_2
-5. https://wiki.osdev.org/Entering_Long_Mode_Directly
-6. https://wiki.osdev.org/Creating_a_64-bit_kernel
-7. https://wiki.osdev.org/Monolithic_Kernel
-https://github.com/stevej/osdev/tree/master
