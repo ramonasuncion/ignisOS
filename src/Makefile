@@ -15,6 +15,7 @@ LD = x86_64-elf-ld
 OBJCOPY = x86_64-elf-objcopy
 
 CFLAGS = -v -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles -g # -mcmodel=kernel
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 KERNEL_OBJ = $(BUILD_DIR)/kernel.o
 
 QEMU = qemu-system-x86_64
@@ -22,12 +23,10 @@ QEMU_FLAGS = -monitor stdio -no-reboot -no-shutdown
 
 all: $(OS_IMAGE)
 
-$(KERNEL_OBJ): kernel.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c kernel.c -o $(KERNEL_OBJ)
-
-$(BUILD_DIR)/kernel.bin: $(KERNEL_OBJ) | $(BUILD_DIR)
-	$(LD) -o $(BUILD_DIR)/kernel.elf $< -T link.ld
-	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel.elf $@
+$(BUILD_DIR)/kernel.bin: $(SRC_FILES) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_FILES) -o $(BUILD_DIR)/kernel.o
+	$(LD) -o $@ $(BUILD_DIR)/kernel.o -T link.ld
+	$(OBJCOPY) -O binary $@ $(BUILD_DIR)/kernel.bin
 
 $(STAGE1_BIN): $(STAGE1_SRC) $(BOOT_DIR)/disk.asm $(BOOT_DIR)/print.asm | $(BUILD_DIR)
 	$(ASM) -I$(BOOT_DIR)/ -f bin $(STAGE1_SRC) -o $(STAGE1_BIN)
