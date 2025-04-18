@@ -11,9 +11,9 @@ CFLAGS_COMMON = -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pie -fno-st
 CFLAGS_DEBUG = -g -v
 
 ifeq ($(DEBUG), 1)
-    CFLAGS = $(CFLAGS_COMMON) $(CFLAGS_DEBUG)
+	CFLAGS = $(CFLAGS_COMMON) $(CFLAGS_DEBUG)
 else
-    CFLAGS = $(CFLAGS_COMMON)
+	CFLAGS = $(CFLAGS_COMMON)
 endif
 
 BUILD_DIR = build
@@ -43,10 +43,15 @@ $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(KERNEL_ELF): $(OBJ_FILES) | $(BUILD_DIR)
-	$(LD) -o $(KERNEL_ELF) $(OBJ_FILES) -T link.ld
+$(OBJ_DIR)/boot/entry.o: $(BOOT_DIR)/entry.asm | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
+	$(ASM) -f elf64 $< -o $@
+
+$(KERNEL_ELF): $(OBJ_DIR)/boot/entry.o $(OBJ_FILES) | $(BUILD_DIR)
+	$(LD) -o $@ $^ -T link.ld
 
 $(KERNEL_BIN): $(KERNEL_ELF) | $(BUILD_DIR)
 	$(OBJCOPY) -O binary $(KERNEL_ELF) $(KERNEL_BIN)
