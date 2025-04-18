@@ -1,0 +1,10 @@
+-Wall
+-Wextra
+-m64
+-mno-red-zone
+-ffreestanding
+-fno-pie
+-fno-stack-protector
+-nostdlib
+-nostartfiles
+-Iinclude
