@@ -37,14 +37,14 @@ enable_a20:
     out      0x92, al
     ret
 
-    %include "disk.asm"
-    %include "print.asm"
+%include "disk.asm"
+%include "print.asm"
 
 stage1_msg:
     db       'IgnisOS stage 1 booting...', 0
 
-    boot_drive db 0
+boot_drive db 0
 
-    times    510-($-$$) db 0            ; pad to 510 bytes
-    dw       0xAA55                     ; boot signature
+times    510-($-$$) db 0            ; pad to 510 bytes
+dw       0xAA55                     ; boot signature
 
