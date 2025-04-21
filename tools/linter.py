@@ -25,7 +25,7 @@ def parse_instr(line, cmt_char=";"):
     s_line = line.strip()
 
     # constants
-    for word in ["equ", "%assign", "%define", "section", "bits", "org"]:
+    for word in ["equ", "%assign", "%define", "section", "bits", "org", "global", "extern"]:
         if re.search(r"\b" + word + r"\b", s_line.lower()):
             code, _, cmt = s_line.partition(cmt_char)
             tokens = code.strip().split(None, maxsplit=1)
