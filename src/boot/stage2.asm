@@ -34,7 +34,7 @@ KERNEL_SECTORS       equ 0xA            ; number of sectors to read
 ; x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
 ; x86_64-elf-nm build/kernel.elf | grep kmain
 ; ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
-;  x86_64-elf-nm build/kernel.elf
+; x86_64-elf-nm build/kernel.elf
 
 start:
     xor      ax, ax                     ; zero ax
@@ -63,8 +63,8 @@ start:
 
     jmp      CODE_SEG:protected_mode_start
 
-    %include "disk.asm"
-    %include "print.asm"
+%include "disk.asm"
+%include "print.asm"
 
     align    8
 gdt_start:
