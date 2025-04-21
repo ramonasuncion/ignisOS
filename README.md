@@ -11,7 +11,7 @@ A hobby osdev project. I intend to develop a x64 monolothic OS.
 
 ## Demo
 
-![OS](./demo.png)
+![OS](./os_demo.png)
 
 ## Deps
 
@@ -114,3 +114,4 @@ Minimal Kernel
 by Andrew S. Tanenbaum (Author), Albert S. Woodhull (Author)
 2. Operating System Concepts, 5th Edition 5th Edition
 by Abraham Silberschatz (Author), Bill Zorbrist (Author), Peter Galvin (Author)
+
