@@ -1,4 +1,4 @@
-ENTRY(kmain)
+ENTRY(_start)
 OUTPUT_FORMAT("elf64-x86-64")
 SECTIONS
 {
@@ -17,7 +17,7 @@ SECTIONS
   }
 
   .bss : {
-    *(COMMON)
     *(.bss)
+    *(COMMON)
   }
 }
