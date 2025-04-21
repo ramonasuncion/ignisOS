@@ -2,6 +2,13 @@
 
 A hobby osdev project. I intend to develop a x64 monolothic OS.
 
+## Quickstart
+
+1. Download the latest release
+2. Go to [copy.sh/v86/](https://copy.sh/v86/)
+3. Go to `Floppy disk image`, click `Choose File`, and select `ignis.img` in the `build` directory.
+4. Click `Start Simulation`
+
 ## Demo
 
 ![OS](./demo.png)
@@ -41,6 +48,23 @@ sudo apt install shellcheck
 
 I welcome contributions to the project. Please read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## IgnisOS Specification
+
+This is what I plan to include in my kernel (things might change):
+
+- Architecture:          64-bit (x86_64)
+- Scheduling:            Non-preemptive
+- Tasking:               Cooperative multi-tasking
+- Cores:                 Multi-core support (SMP)
+- Privilege Level:       Ring-0-only (no user/kernel separation)
+- Memory Model:          Single address space (flat memory model)
+- Networking:            Supported (basic TCP/IP stack)
+- Graphics:              VBE 1024x768 @ 32bpp (16-color / 32-entry palette mode emulation)
+- Text Encoding:         8-bit ASCII (no Unicode)
+- Input:                 PS/2 Keyboard + Mouse
+- File System:           Custom (or FAT12/FAT32)
+- Scriping Language:     Aurum
+
 ## Tasks
 
 Minimal Kernel
@@ -48,29 +72,45 @@ Minimal Kernel
 - [x] Boot to long mode
 - [x] Setup GDT, paging, and 64-bit mode
 - [x] Disk loading (stage 2 + kernel)
+- [x] Flat memory model (partial: identity mapping for first 2MB)
+- [x] Kernel-only mode (Ring 0)
+- [ ] IDT, IRQ, and basic ISRs
 - [ ] Memory mapping and basic protections
 - [ ] Timer (delays and scheduling tasks e.g., PIT or HPET)
-- [ ] Memory allocation
-- [ ] Print funciton in x64
-- [ ] Keyboard input
+- [ ] Memory mapping (full identity mapping)
+- [ ] Memory allocation (kernel heap allocator)
+- [ ] Minimal memory protections (read-only sections, guard pages)
+- [ ] Print function in x64
+- [ ] Start screen
 - [ ] VGA-based text UI
+- [ ] Resizable UI
+- [ ] Font system (Fixed Sys or some 8x8 bitmap font)
+    - [font8x8](https://github.com/dhepper/font8x8)
+- [ ] Keyboard input
+- [ ] Mouse support
 - [ ] Basic shell
 - [ ] Built-in text editor
-- [ ] Math / Drawing library (+ demo programs)
-- [ ] Sound output
+- [ ] Scripting language (Aurum)
+- [ ] Executable/script format support
+- [ ] Symbol table / reflection
 - [ ] File system (FAT12)
-- [ ] Mouse support
-- [ ] Font system
+- [ ] File loading (scripts/programs)
+- [ ] PCI support
+- [ ] Basic scheduler (non-preemptive round robin)
+- [ ] Task model / cooperative multitasking
+- [ ] System call interface
+- [ ] Math / drawing library (+ demo programs)
+- [ ] Graphics in text mode (optional hybrid mode)
+- [ ] Sound output
+- [ ] Basic networking stack
+- [ ] Debugging tools / logging
+- [ ] Panic and fault handler (stack dump, message)
+- [ ] Step/debug trap
+- [ ] Boot self-test / diagnostics
 
-## Brainstorming
+## Reading List
 
-- Flat memory model, identity-mapped (virtual addr = physical addr)
-- Single user, kernel-only (Ring 0)
-- Non premptive
-- Text-based UI (Resizing available)
-- Basic networking stack (IP + UDP)
-- FAT12 file system
-- Basic scheduler (round robin)
-- Minimal memory protections
-- Scripting
-
+1. Operating Systems: Design and Implementation (Second Edition) 2nd Edition
+by Andrew S. Tanenbaum (Author), Albert S. Woodhull (Author)
+2. Operating System Concepts, 5th Edition 5th Edition
+by Abraham Silberschatz (Author), Bill Zorbrist (Author), Peter Galvin (Author)
