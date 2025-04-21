@@ -2,13 +2,6 @@
 
 A hobby osdev project. I intend to develop a x64 monolothic OS.
 
-## Quickstart
-
-1. Download the latest release
-2. Go to [copy.sh/v86/](https://copy.sh/v86/)
-3. Go to `Floppy disk image`, click `Choose File`, and select `ignis.img` in the `build` directory.
-4. Click `Start Simulation`
-
 ## Demo
 
 ![OS](./os_demo.png)
