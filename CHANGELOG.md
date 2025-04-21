@@ -11,7 +11,7 @@
 - Added color palette manipulation functions
 - Implemented cursor positioning and movement
 - Simple VGA text mode driver with background color support
-- Basic string handling ulities (strlen, itoa)
+- Basic string handling utilities (strlen, itoa)
 
 ## 0.0.0 (Apr 10, 2025)
 
