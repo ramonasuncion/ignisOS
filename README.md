@@ -104,7 +104,8 @@ Minimal Kernel
 ## Reading List
 
 1. Operating Systems: Design and Implementation (Second Edition) 2nd Edition
-by Andrew S. Tanenbaum (Author), Albert S. Woodhull (Author)
+by Andrew S. Tanenbaum (Author), Albert S. Woodhull (Author) - Thanks to Professor Xiannong Meng at Bucknell University.
+
 2. Operating System Concepts, 5th Edition 5th Edition
-by Abraham Silberschatz (Author), Bill Zorbrist (Author), Peter Galvin (Author)
+by Abraham Silberschatz (Author), Bill Zorbrist (Author), Peter Galvin (Author) - Thanks to Professor Jessen Havill at Bucknell Univeristy.
 
