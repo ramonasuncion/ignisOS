@@ -51,7 +51,7 @@ $(OBJ_DIR)/boot/entry.o: $(BOOT_DIR)/entry.asm | $(OBJ_DIR)
 	$(ASM) -f elf64 $< -o $@
 
 $(KERNEL_ELF): $(OBJ_DIR)/boot/entry.o $(OBJ_FILES) | $(BUILD_DIR)
-	$(LD) -o $@ $^ -T link.ld
+	$(LD) -o $@ $^ -T link.ld -Map=$(BUILD_DIR)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF) | $(BUILD_DIR)
 	$(OBJCOPY) -O binary $(KERNEL_ELF) $(KERNEL_BIN)
