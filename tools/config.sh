@@ -3,13 +3,13 @@
 set -eu
 
 # shellcheck disable=SC3040
-[ -n "$($SHELL -c \"echo "$BASH_VERSION"\")" ] && set -o pipefail
+[ -n "$($SHELL -c 'echo "$BASH_VERSION"')" ] && set -o pipefail
 
-[ -n "${VERBOSE}" ] && set -x
+[ -n "${VERBOSE+x}" ] && set -x
 
 run()
 {
-  if [ -n "${VERBOSE}" ]; then
+  if [ -n "${VERBOSE+x}" ]; then
    "$@"
   else
    "$@" >/dev/null 2>&1
