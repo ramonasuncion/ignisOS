@@ -2,16 +2,17 @@
 
 set -eu
 
-[ -n "$($SHELL -c 'echo $BASH_VERSION')" ] && set -o pipefail
+# shellcheck disable=SC3040
+[ -n "$($SHELL -c \"echo "$BASH_VERSION"\")" ] && set -o pipefail
 
-[ -n "${VERBOSE}" ]; && set -x
+[ -n "${VERBOSE}" ] && set -x
 
 run()
 {
   if [ -n "${VERBOSE}" ]; then
-   $@
+   "$@"
   else
-   $@ >/dev/null 2>&1
+   "$@" >/dev/null 2>&1
   fi
 }
 
