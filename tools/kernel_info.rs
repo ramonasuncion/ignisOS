@@ -2,26 +2,41 @@ use std::process::Command;
 use std::io;
 
 fn main() {
-    // Run ls -l build/kernel.bin
+    // Run `ls -l build/kernel.bin`
     match run_command("ls", &["-l", "build/kernel.bin"]) {
         Ok(out) => {
-
         }
-        Err(e) => eprintln!("Error runing 'ls': {}", e),
+        Err(e) => eprintln!("Error running 'ls': {}", e),
     }
 
-    // Run x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
+    //// Run `x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"`
     match run_command("x86_64-elf-readelf", &["-h", "build/kernel.elf"]) {
         Ok(out) => {
         }
-        Err(e) => eprintln!("Error runing 'x86_64-elf-readelf': {}", e),
+        Err(e) => eprintln!("Error running 'x86_64-elf-readelf': {}", e),
     }
 
-    // Run x86_64-elf-nm build/kernel.elf | grep kmain
+    // Run `x86_64-elf-nm build/kernel.elf | grep kmain`
+    match run_command("x86_64-elf-nm", &["build/kernel.elf"]) {
+        Ok(out) => {
+        },
+        Err(e) => eprintln!(""),
+    }
 
-    // Run ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
+    // Run `ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}`
+    match run_command("ls", &["-l", "build/*.bin"]) {
+        Ok(out) => {
+        },
+        Err(e) => eprintln!(""),
+    }
 
-    // Run x86_64-elf-nm build/kernel.elf
+    // Run `x86_64-elf-nm build/kernel.elf`
+    match run_command("x86_64-elf-nm", &["build/kernel.elf"]) {
+        Ok(out) => {
+            println!("Symbols in kernel.elf:\n{}", out);
+        }
+        Err(e) => eprintln!("Error running 'x86_64-elf-nm': {}", e),
+    }
 }
 
 fn run_command(command: &str, args: &[&str]) -> Result<String, io::Error> {
