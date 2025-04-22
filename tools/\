@@ -1,0 +1,29 @@
+use std::process::Command;
+use std::io::{self, Write};
+
+// use num_traits::Float;
+
+
+// ls -l build/kernel.bin # ceil(size / 512)
+// x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
+// x86_64-elf-nm build/kernel.elf | grep kmain
+// ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
+// x86_64-elf-nm build/kernel.elf
+
+fn main() {
+    match run_command("ls", &["-l"]) {
+        _ => todo!(),
+    }
+}
+
+fn run_command(command: &str, args: &[&str]) -> Result<String, io::Error> {
+    let out = Command::new(command)
+        .args(args)
+        .output()?;
+
+    if !out.status.success() {
+        return Err(io::Error::new(io::ErrorKind::Other, format!("Command {:?} not found", output)));
+    }
+
+    Ok(String::from_utf8_lossy(&out.stdout).to_string())
+}
