@@ -15,37 +15,48 @@ fn main() {
     // Run `x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"`
     match run_command("x86_64-elf-readelf", &["-h", "build/kernel.elf"]) {
         Ok(out) => {
-            out.lines();
-            // break into multiple lines
-            // find the line that has entry point
-            // extract line
-            // extract the entry point
-            println!("{}", out);
-        }
+            if let Some(entry_point) = out.lines()
+                .find(|line| line.contains("Entry point")) {
+                println!("Entry point: {}", entry_point);
+            } else {
+                eprintln!("Entry point not found in the ELF file.");
+            }
+        },
         Err(e) => eprintln!("Error running 'x86_64-elf-readelf': {}", e),
     }
 
     // Run `x86_64-elf-nm build/kernel.elf | grep kmain`
     match run_command("x86_64-elf-nm", &["build/kernel.elf"]) {
-        Ok(_out) => {
+        Ok(out) => {
+            if let Some(kernel_main) = out.lines()
+                .find(|line| line.contains("kmain")) {
+                println!("kmain symbol: {}", kernel_main);
+            } else {
+                eprintln!("kmain symbol not found.");
+            }
         },
         Err(e) => eprintln!("Error running 'x86_64-elf-nm': {}", e),
     }
 
     // Run `ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}`
-    //match run_command("ls", &["-l", "build/*.bin"]) {
-    //    Ok(out) => {
-    //    },
-    //    Err(e) => eprintln!(""),
-    //}
+    match run_command("ls", &["-l", "build/*.bin"]) {
+        Ok(out) => {
+            let total_size: u64 = out.lines()
+                .filter_map(|line| line.split_whitespace().nth(4))
+                .filter_map(|s| s.parse::<u64>().ok())
+                .sum();
+            println!("Total size of .bin files: {} bytes", total_size)
+        },
+        Err(e) => eprintln!("Error running 'ls' on .bin files: {}", e),
+    }
 
     // Run `x86_64-elf-nm build/kernel.elf`
-    //match run_command("x86_64-elf-nm", &["build/kernel.elf"]) {
-    //    Ok(out) => {
-    //        println!("Symbols in kernel.elf:\n{}", out);
-    //    }
-    //    Err(e) => eprintln!("Error running 'x86_64-elf-nm': {}", e),
-    //}
+    match run_command("x86_64-elf-nm", &["build/kernel.elf"]) {
+        Ok(out) => {
+            println!("Symbols in kernel.elf:\n{}", out);
+        }
+        Err(e) => eprintln!("Error running 'x86_64-elf-nm': {}", e),
+    }
 }
 
 fn run_command(command: &str, args: &[&str]) -> Result<String, io::Error> {
