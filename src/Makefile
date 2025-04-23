@@ -7,7 +7,7 @@ QEMU_FLAGS = -monitor stdio -no-reboot -no-shutdown
 
 DEBUG = 0
 
-CFLAGS_COMMON = -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles -mcmodel=kernel -Iinclude
+CFLAGS_COMMON = -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pie -fno-stack-protector -nostdlib -nostartfiles -mcmodel=kernel -Iinclude -fdata-sections -ffunction-sections -O0
 CFLAGS_DEBUG = -g -v
 
 ifeq ($(DEBUG), 1)
@@ -51,7 +51,7 @@ $(OBJ_DIR)/boot/entry.o: $(BOOT_DIR)/entry.asm | $(OBJ_DIR)
 	$(ASM) -f elf64 $< -o $@
 
 $(KERNEL_ELF): $(OBJ_DIR)/boot/entry.o $(OBJ_FILES) | $(BUILD_DIR)
-	$(LD) -o $@ $^ -T link.ld -Map=$(BUILD_DIR)/kernel.map
+	$(LD) -e _start -o $@ $^ -T link.ld -Map=$(BUILD_DIR)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF) | $(BUILD_DIR)
 	$(OBJCOPY) -O binary $(KERNEL_ELF) $(KERNEL_BIN)
