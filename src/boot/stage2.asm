@@ -28,14 +28,9 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
-KERNEL_SECTORS       equ 0xA            ; number of sectors to read
+KERNEL_SECTORS       equ 0x20           ; number of sectors to read
 
-; ls -l build/kernel.bin # ceil(size / 512)
-; x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
-; x86_64-elf-nm build/kernel.elf | grep kmain
-; ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
-; x86_64-elf-nm build/kernel.elf
-
+bits                 16
 start:
     xor      ax, ax                     ; zero ax
     mov      ds, ax                     ; set up segments
@@ -53,7 +48,7 @@ start:
     mov      si, kernel_loaded_msg
     call     print_string
 
-    lgdt     [gdt_descriptor]           ; load gdt
+    lgdt     [gdt_descriptor_32]        ; load gdt
 
     cli                                 ; disable interrupts before mode switch
 
@@ -96,9 +91,14 @@ gdt_code64:
 
 gdt_end:
 
-gdt_descriptor:
+gdt_descriptor_32:
     dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
     dd       gdt_start                  ; address of gdt
+
+gdt_descriptor_64:
+    dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
+    dq       gdt_start                  ; 64-bit address of gdt (upper 32 bits are 0)
+
 
 bits                 32
 protected_mode_start:
@@ -114,7 +114,7 @@ protected_mode_start:
     call     setup_paging
     call     enable_long_mode
 
-    lgdt     [gdt_descriptor]           ; reload same gdt
+    lgdt     [gdt_descriptor_64]        ; reload same gdt
 
     jmp      CODE64_SEG:long_mode_start
 
@@ -140,19 +140,64 @@ setup_paging:
 
     ; setup identity mapping for first 2MB of memory
     mov      edi, PT_ADDRESS
-    mov      ebx, PAGE_PRESENT | PAGE_WRITE
-    mov      ecx, ENTRIES_PER_PT
+    xor      ebx, ebx                   ; start at physical address 0
+    ; mov      ecx, ENTRIES_PER_PT
+    %assign ENTRIES_TO_MAP 512 * 8
+    mov ecx, ENTRIES_TO_MAP
 
-.map:
-    mov      dword [edi], ebx
+.map_loop:
+    mov      eax, ebx
+    or       eax, PAGE_PRESENT | PAGE_WRITE
+    mov      dword [edi], eax
     mov      dword [edi+4], 0
+
     add      ebx, PAGE_SIZE
     add      edi, PAGE_ENTRY_SIZE
-    loop     .map
+    loop     .map_loop
 
     mov      eax, PML4_ADDRESS
     mov      cr3, eax
+
     ret
+
+
+; .map_loop:
+;     ; Map .text section (read-only, executable)
+;     cmp      ebx, 0x101000              ; start of .rodata
+;     jb       .map_text
+;     cmp      ebx, 0x102000              ; end of .rodata
+;     jae      .map_normal
+
+;     ; Map .rodata section as read-only
+;     mov      eax, ebx
+;     or       eax, PAGE_PRESENT          ; read-only (no PAGE_WRITE)
+;     mov      dword [edi], eax
+;     jmp      .next_entry
+
+; .map_text:
+;     ; Map .text section as read-only
+;     mov      eax, ebx
+;     or       eax, PAGE_PRESENT          ; read-only (no PAGE_WRITE)
+;     mov      dword [edi], eax
+;     jmp      .next_entry
+
+; .map_normal:
+;     ; Map other sections as read-write
+;     mov      eax, ebx
+;     or       eax, PAGE_PRESENT | PAGE_WRITE
+;     mov      dword [edi], eax
+
+; .next_entry:
+;     mov      dword [edi+4], 0
+;     add      ebx, PAGE_SIZE             ; next 4K page
+;     add      edi, PAGE_ENTRY_SIZE       ; next entry
+;     loop     .map_loop
+
+;     ; Set cr3 to point to the PML4 table
+;     mov      eax, PML4_ADDRESS
+;     mov      cr3, eax
+
+;     ret
 
 enable_long_mode:
     ; enable pae
@@ -173,19 +218,31 @@ enable_long_mode:
 
     ret
 
+; bits                 64
+; long_mode_start:
+;     ; clear segment registers
+;     xor      rax, rax
+;     mov      ds, ax
+;     mov      es, ax
+;     mov      ss, ax
+;     mov      fs, ax
+;     mov      gs, ax
 bits                 64
 long_mode_start:
-    ; clear segment registers
-    xor      rax, rax
-    mov      ds, ax
-    mov      es, ax
-    mov      ss, ax
+    ; Set up segment registers correctly
+    mov      ax, DATA_SEG    ; Use data segment (0x10)
+    mov      ds, ax          ; Data segment
+    mov      es, ax          ; Extra segment
+    mov      ss, ax          ; Stack segment
+    xor      ax, ax          ; Only FS and GS can be zero
     mov      fs, ax
     mov      gs, ax
 
     mov      rsp, 0x90000               ; setup 64-bit stack
+    and      rsp, ~0xF     ; Ensure 16-byte alignment (required by x86-64 ABI)
+    mov      rbp, rsp      ; Set base pointer too
 
-    ; TODO:  don't enable the interrupts unless I set up a 64-bit IDT of course.
+    cld
 
     mov      rsi, 0x9000                ; source (temp buffer)
     mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
