@@ -1,0 +1,30 @@
+map file
+cat build/kernel.map
+
+inspect binary layout
+x86_64-elf-objdump -d build/kernel.elf | less
+
+section alignemtn
+x86_64-elf-readelf -S build/kernel.elf
+
+x86_64-elf-objdump -h build/kernel.elf
+
+.rodata
+x86_64-elf-objdump -h build/kernel.elf | grep "\.rodata" | awk '{print $4}'
+
+.data (end of .rodata)
+x86_64-elf-objdump -h build/kernel.elf | grep "\.data " | awk '{print $4}'
+
+stat -f %z build/kernel.bin (bytes)
+
+sector size:
+echo $(( ($(stat -f %z build/kernel.bin) + 511) / 512 ))
+
+sector size in hex:
+printf "0x%X\n" $(( ($(stat -f %z build/kernel.bin) + 511) / 512 ))
+
+src ➤ size_bytes=$(stat -f %z build/kernel.bin) && \                                                                    git:script*
+sectors=$((($size_bytes + 511) / 512)) && \
+printf "Kernel size: %d bytes\nSectors needed: %d (0x%X in hex)\n" $size_bytes $sectors $sectors
+Kernel size: 8200 bytes
+Sectors needed: 17 (0x11 in hex)

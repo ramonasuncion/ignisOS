@@ -1,23 +1,37 @@
 ENTRY(_start)
-OUTPUT_FORMAT("elf64-x86-64")
+
 SECTIONS
 {
-  . = 0x100000;    /* Kernel loads at 1MB */
+  /* Kernel starts at 1MB physical address */
+  . = 0x100000;
 
-  .text : {
-    *(.text)
+  _start = .;
+
+  .text :
+  {
+    *(.text.boot)  /* Boot code first */
+    *(.text)       /* Regular code */
+    *(.text.*)
   }
 
-  .rodata : {
+  .rodata :
+  {
     *(.rodata)
+    *(.rodata.*)
   }
 
-  .data : {
+  .data ALIGN(4K) :
+  {
     *(.data)
   }
 
-  .bss : {
-    *(.bss)
+  .bss :
+  {
+    _bss_start = .;
     *(COMMON)
+    *(.bss)
+    _bss_end = .;
   }
+
+  _end = .;
 }
