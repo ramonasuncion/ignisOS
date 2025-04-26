@@ -159,3 +159,16 @@ void kprint_hex(uint32_t number)
 
   kprint(buffer);
 }
+
+void vga_putchar(char ch) 
+{
+    int offset = vga_get_cursor();
+    if (ch == '\n') {
+        offset = move_offset_to_new_line(offset);
+    } else {
+        set_char_at_video_memory(ch, offset);
+        offset += 2;
+    }
+    vga_set_cursor(offset);
+}
+

@@ -7,30 +7,39 @@ SECTIONS
 
   _start = .;
 
-  .text :
+  .text ALIGN(16) : 
   {
     *(.text.boot)  /* Boot code first */
     *(.text)       /* Regular code */
     *(.text.*)
   }
 
-  .rodata :
+  .rodata ALIGN(16) :
   {
     *(.rodata)
     *(.rodata.*)
   }
+  _rodata_end = .;
 
-  .data ALIGN(4K) :
+  .data ALIGN(16) :
   {
     *(.data)
   }
+  _data_end = .;
 
-  .bss :
+  .bss ALIGN(16) :
   {
     _bss_start = .;
     *(COMMON)
     *(.bss)
     _bss_end = .;
+  }
+
+  /DISCARD/ :
+  {
+    *(.comment)
+    *(.eh_frame)
+    *(.note.gnu.build-id)
   }
 
   _end = .;

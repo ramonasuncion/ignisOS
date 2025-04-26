@@ -6,51 +6,51 @@
 /**
  * Convert an integer to a string
  */
-char *itoa(int value, char *str, int base)
-{
-  char *rc;
-  char *ptr;
-  char *low;
+// char *itoa(int value, char *str, int base)
+// {
+//   char *rc;
+//   char *ptr;
+//   char *low;
 
-  // Check for supported base
-  if (base < 2 || base > 36) {
-    *str = '\0';
-    return str;
-  }
+//   // Check for supported base
+//   if (base < 2 || base > 36) {
+//     *str = '\0';
+//     return str;
+//   }
 
-  rc = ptr = str;
+//   rc = ptr = str;
 
-  // Set '-' for negative numbers
-  if (value < 0 && base == 10) {
-    *ptr++ = '-';
-  }
+//   // Set '-' for negative numbers
+//   if (value < 0 && base == 10) {
+//     *ptr++ = '-';
+//   }
 
-  // Remember start position
-  low = ptr;
+//   // Remember start position
+//   low = ptr;
 
-  // Convert to absolute value for processing
-  unsigned int num = (value < 0) ? -value : value;
+//   // Convert to absolute value for processing
+//   unsigned int num = (value < 0) ? -value : value;
 
-  do {
-    // Convert remainder to ASCII and store it
-    int remainder = num % base;
-    *ptr++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
-    num /= base;
-  } while (num > 0);
+//   do {
+//     // Convert remainder to ASCII and store it
+//     int remainder = num % base;
+//     *ptr++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
+//     num /= base;
+//   } while (num > 0);
 
-  // Terminate the string
-  *ptr = '\0';
+//   // Terminate the string
+//   *ptr = '\0';
 
-  // Reverse the string (excluding the sign if present)
-  ptr--;
-  while (low < ptr) {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
-  }
+//   // Reverse the string (excluding the sign if present)
+//   ptr--;
+//   while (low < ptr) {
+//     char tmp = *low;
+//     *low++ = *ptr;
+//     *ptr-- = tmp;
+//   }
 
-  return rc;
-}
+//   return rc;
+// }
 
 /**
  * Calculate the length of a string
