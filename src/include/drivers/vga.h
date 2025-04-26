@@ -27,5 +27,6 @@ void vga_set_char(int color, char ch, int offset);
 void kprint(const char *string);
 void kprint_hex(uint32_t number);
 char digit_to_hex(uint8_t digit);
+void vga_putchar(char ch);
 
 #endif /* _VGA_H_ */

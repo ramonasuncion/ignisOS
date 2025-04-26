@@ -28,9 +28,9 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
-KERNEL_SECTORS       equ 0x20           ; number of sectors to read
+KERNEL_SECTORS       equ 0x36           ; number of sectors to read
 
-bits                 16
+; bits                 16
 start:
     xor      ax, ax                     ; zero ax
     mov      ds, ax                     ; set up segments
@@ -48,7 +48,7 @@ start:
     mov      si, kernel_loaded_msg
     call     print_string
 
-    lgdt     [gdt_descriptor_32]        ; load gdt
+    lgdt     [gdt_descriptor]           ; load gdt
 
     cli                                 ; disable interrupts before mode switch
 
@@ -91,14 +91,9 @@ gdt_code64:
 
 gdt_end:
 
-gdt_descriptor_32:
+gdt_descriptor:
     dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
     dd       gdt_start                  ; address of gdt
-
-gdt_descriptor_64:
-    dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
-    dq       gdt_start                  ; 64-bit address of gdt (upper 32 bits are 0)
-
 
 bits                 32
 protected_mode_start:
@@ -114,7 +109,7 @@ protected_mode_start:
     call     setup_paging
     call     enable_long_mode
 
-    lgdt     [gdt_descriptor_64]        ; reload same gdt
+    lgdt     [gdt_descriptor]        ; reload same gdt
 
     jmp      CODE64_SEG:long_mode_start
 
@@ -126,7 +121,7 @@ setup_paging:
     rep      stosd                      ; repeat store double word
 
     ; setup 4-level paging hierarchy
-    mov      edi, PML4_ADDRESS
+    mov      edi, PML4_ADDRESS          ; Fixed typo here
     mov      dword [edi], PDPT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
     mov      dword [edi+4], 0
 
@@ -142,8 +137,7 @@ setup_paging:
     mov      edi, PT_ADDRESS
     xor      ebx, ebx                   ; start at physical address 0
     ; mov      ecx, ENTRIES_PER_PT
-    %assign ENTRIES_TO_MAP 512 * 8
-    mov ecx, ENTRIES_TO_MAP
+    mov      ecx, 1024
 
 .map_loop:
     mov      eax, ebx
@@ -218,31 +212,16 @@ enable_long_mode:
 
     ret
 
-; bits                 64
-; long_mode_start:
-;     ; clear segment registers
-;     xor      rax, rax
-;     mov      ds, ax
-;     mov      es, ax
-;     mov      ss, ax
-;     mov      fs, ax
-;     mov      gs, ax
 bits                 64
 long_mode_start:
-    ; Set up segment registers correctly
-    mov      ax, DATA_SEG    ; Use data segment (0x10)
-    mov      ds, ax          ; Data segment
-    mov      es, ax          ; Extra segment
-    mov      ss, ax          ; Stack segment
-    xor      ax, ax          ; Only FS and GS can be zero
+    xor      ax, ax
+    mov      ds, ax          ; data segment
+    mov      es, ax          ; extra segment
+    mov      ss, ax          ; stack segment
     mov      fs, ax
     mov      gs, ax
 
     mov      rsp, 0x90000               ; setup 64-bit stack
-    and      rsp, ~0xF     ; Ensure 16-byte alignment (required by x86-64 ABI)
-    mov      rbp, rsp      ; Set base pointer too
-
-    cld
 
     mov      rsi, 0x9000                ; source (temp buffer)
     mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
@@ -250,7 +229,8 @@ long_mode_start:
     rep      movsb                      ; copy byte by byte
 
     mov      rax, KERNEL_LOAD_ADDR      ; load kernel
-    jmp      rax                        ; jump to kernel entry point
+    call     rax                        ; jump to kernel entry point
+    jmp      .hang
 
     ; if kernel returns halt (?)
 

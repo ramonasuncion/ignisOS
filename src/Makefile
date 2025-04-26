@@ -41,7 +41,7 @@ $(KERNEL_ELF): $(OBJ_FILES) $(OBJ)/boot/entry.o
 	$(LD) -o $@ $^ -T link.ld -Map=$(BUILD)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF)
-	$(OBJCOPY) -O binary  -j .text -j .rodata -j .data -j .bss $< $@
+	$(OBJCOPY) -O binary $< $@
 
 $(STAGE1_BIN): $(BOOT)/stage1.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
@@ -65,3 +65,4 @@ clean:
 	rm -rf $(BUILD) $(OBJ)
 
 .PHONY: all run debug clean
+
