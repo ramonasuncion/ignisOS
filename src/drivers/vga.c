@@ -58,9 +58,8 @@ static int get_row_from_offset(int offset)
 
 static void set_char_at_video_memory(char character, int offset)
 {
-  unsigned char *vidmem = (unsigned char *) VGA_MEMORY;
-  vidmem[offset] = character;
-  vidmem[offset + 1] = current_attribute;
+  vga_ptr[offset] = character;
+  vga_ptr[offset + 1] = current_attribute;
 }
 
 static int get_offset(int col, int row)
