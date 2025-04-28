@@ -1,46 +1,62 @@
+
 ENTRY(_start)
 
 SECTIONS
 {
-  /* Kernel starts at 1MB physical address */
-  . = 0x100000;
+  . = 0x00100000;
 
-  _start = .;
-
-  .text ALIGN(16) : 
+  .text.boot :
   {
-    *(.text.boot)  /* Boot code first */
-    *(.text)       /* Regular code */
-    *(.text.*)
+    *(.text.boot)
   }
 
-  .rodata ALIGN(16) :
+  .text :
   {
-    *(.rodata)
-    *(.rodata.*)
+    *(.text)
   }
-  _rodata_end = .;
 
-  .data ALIGN(16) :
+  .data :
   {
     *(.data)
   }
-  _data_end = .;
 
-  .bss ALIGN(16) :
+  .bss :
   {
-    _bss_start = .;
     *(COMMON)
     *(.bss)
-    _bss_end = .;
   }
-
-  /DISCARD/ :
-  {
-    *(.comment)
-    *(.eh_frame)
-    *(.note.gnu.build-id)
-  }
-
-  _end = .;
 }
+
+
+/* OUTPUT_FORMAT("elf64-x86-64")
+ENTRY(_start)
+phys = 0x100000;
+SECTIONS
+{
+  .text phys : AT(phys) {
+      code = .;
+      *(.text.boot)
+      *(.text)
+      . = ALIGN(4096);
+  }
+  .rodata : AT(phys + (rodata - code)) {
+      rodata = .;
+      *(.rodata)
+      *(.rodata.*)
+      . = ALIGN(4096);
+  }
+  .data : AT(phys + (data - code))
+  {
+    data = .;
+    *(.data)
+    . = ALIGN(4096);
+  }
+  .bss : AT(phys + (bss - code))
+  {
+    bss = .;
+    *(.bss)
+    *(COMMON)
+    . = ALIGN(4096);
+  }
+  end = .;
+} */
