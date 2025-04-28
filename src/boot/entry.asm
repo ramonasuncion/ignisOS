@@ -1,35 +1,31 @@
 bits                 64
+section              .text.boot
 global               _start
 extern               kmain
 
-extern               _bss_start
-extern               _bss_end
-
-section              .text.boot
 _start:
-    ; todo: clear BSS section
-    ; mov rdi, _bss_start
-    ; mov rcx, _bss_end
+    ; Clear BSS section
+    ; extern bss
+    ; extern end
+    ; mov rdi, bss
+    ; mov rcx, end
     ; sub rcx, rdi
     ; xor rax, rax
-    ; cld
-    ; rep stosb
-
-    ; setup kernel stack
+    ; rep stosb        ; zero out the BSS section
+    
+    ; Set up stack
     mov      rsp, stack_top
     mov      rbp, rsp
-    and      rsp, -16                   ; 16-byte aligned
+    and      rsp, -16                   ; align the stack to 16 bytes
 
-    ; call kernel main function
-    call     kmain
+    call     kmain                      ; jump to kernel main function
 
-    ;if kmain returns, halt the system
-    cli
+.hang:
     hlt
+    jmp      .hang
 
 section              .bss
     align    16
 stack_bottom:
-    resb     65536                      ; 64KB stack
+    resb     16384                      ; reserve 16 KiB for the stack
 stack_top:
-

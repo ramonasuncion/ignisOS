@@ -1,21 +1,13 @@
-#include <drivers/vga.h>
 #include <stdint.h>
+// #include <drivers/vga.h>
 
-void print_string(const char* str) 
+void kmain()
 {
-  int i = 0;
-  while(str[i] != '\0') {
-    vga_putchar(str[i]);
-    i++;
+  // vga_init();
+  // vga_set_background_color(0x00, 0x00, 0x1F);
+  char *message = "Hello, World!";
+  // kprint(message);
+  while(1) {
+    asm volatile ("hlt");
   }
-}
-
-void kmain() 
-{
-    vga_clear();
-    vga_set_background_color(0x00, 0x00, 0x1F);
-      print_string("Hey!");
-    while(1) {
-        asm volatile ("hlt");
-    }
 }

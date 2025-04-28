@@ -105,10 +105,6 @@ void vga_set_background_color(unsigned char red, unsigned char green, unsigned c
 {
   vga_set_palette_index(0x00);
   vga_set_palette_color(red, green, blue);
-
-  unsigned char bg_color = 0;
-  if (blue > 0x10) bg_color = 0x10;
-  current_attribute = 0x0F | bg_color;
 }
 
 void vga_set_char(int color, char ch, int offset)
