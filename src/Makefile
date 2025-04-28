@@ -11,10 +11,17 @@ BOOT      = boot
 SRC       = .
 IMG       = $(BUILD)/ignis.img
 
-CFLAGS    = -Wall -Wextra -m64 -mno-red-zone -ffreestanding -fno-pic -fno-pie \
-            -fno-stack-protector -nostdlib -nostartfiles -mcmodel=kernel \
-            -Iinclude -O0 -fno-merge-constants -fno-inline -fno-omit-frame-pointer \
-            -fno-builtin -g -v # -fno-common -fdata-sections -ffunction-sections
+CFLAGS_COMMON = -Wall -Wextra -mno-red-zone -ffreestanding -fno-pic -fno-pie \
+								-fno-stack-protector -nostdlib -nostartfiles -fno-exceptions \
+								-Iinclude -fno-builtin -nodefaultlibs -mcmodel=kernel
+
+CFLAGS_DEBUG  = -O0 -fno-inline -fno-omit-frame-pointer -g -v
+
+# Select build type flags (default DEBUG)
+# TODO: Create a make release.
+CFLAGS_BUILD ?= $(CFLAGS_DEBUG)
+
+CFLAGS = $(CFLAGS_COMMON) $(CFLAGS_BUILD)
 
 SRC_FILES = $(shell find $(SRC) -name '*.c')
 OBJ_FILES = $(patsubst $(SRC)/%, $(OBJ)/%, $(SRC_FILES:.c=.o))
@@ -37,8 +44,7 @@ $(OBJ)/boot/%.o: $(BOOT)/%.asm
 	@mkdir -p $(dir $@)
 	$(ASM) -f elf64 $< -o $@
 
-$(KERNEL_ELF): obj/kernel/entry.o obj/boot/entry.o
-	# $(OBJ_FILES) $(OBJ)/boot/entry.o
+$(KERNEL_ELF): $(OBJ)/boot/entry.o $(OBJ_FILES)
 	$(LD) -o $@ $^ -T $(SRC)/link.ld -Map=$(BUILD)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF)

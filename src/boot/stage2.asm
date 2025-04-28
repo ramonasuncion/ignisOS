@@ -152,6 +152,9 @@ setup_paging:
     mov      eax, PML4_ADDRESS
     mov      cr3, eax
 
+    mov      eax, cr3
+    mov      cr3, eax
+
     ret
 
 
@@ -215,11 +218,13 @@ enable_long_mode:
 bits                 64
 long_mode_start:
     xor      ax, ax
-    mov      ds, ax          ; data segment
-    mov      es, ax          ; extra segment
-    mov      ss, ax          ; stack segment
+    mov      ds, ax                     ; data segment
+    mov      es, ax                     ; extra segment
+    mov      ss, ax                     ; stack segment
     mov      fs, ax
     mov      gs, ax
+
+    wbinvd                              ; flush the cache
 
     mov      rsp, 0x90000               ; setup 64-bit stack
 
