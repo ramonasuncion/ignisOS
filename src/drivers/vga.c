@@ -25,15 +25,15 @@ static void vga_update_cursor(void)
   outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
 
-static uint16_t vga_get_cursor_position(void)
-{
-  uint16_t pos = 0;
-  outb(0x3D4, 0x0F);
-  pos |= inb(0x3D5);
-  outb(0x3D4, 0x0E);
-  pos |= ((uint16_t)inb(0x3D5)) << 8;
-  return pos;
-}
+// static uint16_t vga_get_cursor_position(void)
+// {
+//   uint16_t pos = 0;
+//   outb(0x3D4, 0x0F);
+//   pos |= inb(0x3D5);
+//   outb(0x3D4, 0x0E);
+//   pos |= ((uint16_t)inb(0x3D5)) << 8;
+//   return pos;
+// }
 
 static void vga_set_cursor(int offset) {
   offset /= 2;
