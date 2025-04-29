@@ -2,10 +2,10 @@ bits                 16
 org                  0x8000             ; where stage2 loads
 
 ; constants
-NULL_SEG             equ 0x00
-CODE_SEG             equ 0x08
-CODE64_SEG           equ 0x18
-DATA_SEG             equ 0x10
+; NULL_SEG             equ 0x00
+; CODE_SEG             equ 0x08
+; CODE64_SEG           equ 0x18
+; DATA_SEG             equ 0x10
 
 ; page table constants
 PAGE_PRESENT         equ (1 << 0)
@@ -28,7 +28,7 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
-KERNEL_SECTORS       equ 0x36           ; number of sectors to read
+KERNEL_SECTORS       equ 0x32           ; number of sectors to read
 
 ; bits                 16
 start:
@@ -39,6 +39,10 @@ start:
     mov      si, stage2_msg
     call     print_string
 
+    ; TODO: setup base pointer and stack pointer
+    mov      bp, 0x0500
+    mov      sp, bp
+
     mov      bx, 0x9000                 ; temporary buffer
     mov      dh, KERNEL_SECTORS         ; number of sectors to read
     mov      dl, [boot_drive]           ; boot drive number
@@ -48,7 +52,7 @@ start:
     mov      si, kernel_loaded_msg
     call     print_string
 
-    lgdt     [gdt_descriptor]           ; load gdt
+    lgdt     [gdt_descriptor32]           ; load gdt
 
     cli                                 ; disable interrupts before mode switch
 
@@ -56,16 +60,19 @@ start:
     or       eax, 0x1                   ; set pe bit (bit 0) in cr0
     mov      cr0, eax
 
-    jmp      CODE_SEG:protected_mode_start
+    jmp      CODE32_SEG:protected_mode_start
 
 %include "disk.asm"
 %include "print.asm"
 
-    align    8
-gdt_start:
-    dq       0x0000000000000000         ; null descriptor
+    ; align    8
+gdt_start32:
+    ; null descriptor
+    ; dq       0x0000000000000000         ; null descriptor
+    dd       0x00000000
+    dd       0x00000000
 
-gdt_code:
+gdt_code32:
     dw       0xFFFF                     ; limit low
     dw       0x0000                     ; base low
     db       0x00                       ; base mid
@@ -73,7 +80,7 @@ gdt_code:
     db       0xCF                       ; flags: granularity=1, 32-bit protected mode (D=1, L=0)
     db       0x00                       ; base high
 
-gdt_data:
+gdt_data32:
     dw       0xFFFF                     ; limit low
     dw       0x0000                     ; base low
     db       0x00                       ; base mid
@@ -81,23 +88,19 @@ gdt_data:
     db       0xCF                       ; flags: granularity=1, 32-bit (D=1)
     db       0x00                       ; base high
 
-gdt_code64:
-    dw       0xFFFF                     ; limit low
-    dw       0x0000                     ; base low
-    db       0x00                       ; base mid
-    db       0x9A                       ; access byte: present, ring0, executable, readable
-    db       0xAF                       ; flags: granularity=1, L=1, D=0 (must be 0 for 64-bit)
-    db       0x00                       ; base high
+gdt_end32:
 
-gdt_end:
+gdt_descriptor32:
+    dw       gdt_end32 - gdt_start32 - 1    ; size of gdt minus 1
+    dd       gdt_start32                  ; address of gdt
 
-gdt_descriptor:
-    dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
-    dd       gdt_start                  ; address of gdt
+
+CODE32_SEG: equ gdt_code32 - gdt_start32
+DATA32_SEG: equ gdt_data32 - gdt_start32
 
 bits                 32
 protected_mode_start:
-    mov      ax, DATA_SEG
+    mov      ax, DATA32_SEG
     mov      ds, ax
     mov      es, ax
     mov      fs, ax
@@ -109,54 +112,131 @@ protected_mode_start:
     call     setup_paging
     call     enable_long_mode
 
-    lgdt     [gdt_descriptor]        ; reload same gdt
+    lgdt     [gdt_descriptor64]
 
     jmp      CODE64_SEG:long_mode_start
 
+; gdt_code64:
+;     dw       0xFFFF                     ; limit low
+;     dw       0x0000                     ; base low
+;     db       0x00                       ; base mid
+;     db       0x9A                       ; access byte: present, ring0, executable, readable
+;     db       0xAF                       ; flags: granularity=1, L=1, D=0 (must be 0 for 64-bit)
+;     db       0x00                       ; base high
+
+    ; align    8
+    align    4
+gdt_start64:
+    ; null descriptor
+    ; dq       0x0000000000000000         ; null descriptor
+    dd       0x00000000
+    dd       0x00000000
+
+gdt_code64:
+    dw       0xFFFF                     ; limit low
+    dw       0x0000                     ; base low
+    db       0x00                       ; base mid
+    db       0x9A                       ;
+    db       0xAF                       ;
+    db       0x00                       ; base high
+
+gdt_data64:
+    dw       0xFFFF                     ; limit low
+    dw       0x0000                     ; base low
+    db       0x00                       ; base mid
+    db       0x92                       ;
+    db       0xA0                       ;
+    db       0x00                       ; base high
+
+gdt_end64:
+
+gdt_descriptor64:
+    dw       gdt_end64 - gdt_start64 - 1  ; size of gdt minus 1
+    dd       gdt_start64                  ; address of gdt
+
+CODE64_SEG: equ gdt_code64 - gdt_start64
+DATA64_SEG: equ gdt_data64 - gdt_start64
+
 setup_paging:
-    ; clear memory for page tables
-    mov      edi, PML4_ADDRESS          ; starting address for paging struct
-    xor      eax, eax                   ; value to write (0)
-    mov      ecx, 16384                 ; clear 64kb
-    rep      stosd                      ; repeat store double word
+    pushad
 
-    ; setup 4-level paging hierarchy
-    mov      edi, PML4_ADDRESS          ; Fixed typo here
-    mov      dword [edi], PDPT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
+    ; clear the memory area
+    mov edi, 0x1000
+    mov cr3, edi
+    xor eax, eax
+    mov ecx, 4096
+    rep stosd
 
-    mov      edi, PDPT_ADDRESS
-    mov      dword [edi], PD_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
+    ; set edi back to PML4T[0]
+    mov edi, cr3
 
-    mov      edi, PD_ADDRESS
-    mov      dword [edi], PT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
+    mov dword[edi], 0x2003
+    add edi, 0x1000
+    mov dword[edi], 0x3003
+    add edi, 0x1000
+    mov dword[edi], 0x4003
 
-    ; setup identity mapping for first 2MB of memory
-    mov      edi, PT_ADDRESS
-    xor      ebx, ebx                   ; start at physical address 0
-    ; mov      ecx, ENTRIES_PER_PT
-    mov      ecx, 1024
+    add edi, 0x1000
+    mov ebx, 0x00000003
+    mov ecx, 512
 
-.map_loop:
-    mov      eax, ebx
-    or       eax, PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi], eax
-    mov      dword [edi+4], 0
+    add_page_entry_protected:
+        mov dword[edi], ebx
+        add ebx, 0x1000
+        add edi, 8
+        loop add_page_entry_protected
 
-    add      ebx, PAGE_SIZE
-    add      edi, PAGE_ENTRY_SIZE
-    loop     .map_loop
+    mov eax, cr4
+    or eax, 1 << 5
+    mov cr4, eax
 
-    mov      eax, PML4_ADDRESS
-    mov      cr3, eax
-
-    mov      eax, cr3
-    mov      cr3, eax
-
+    popad
     ret
 
+
+; setup_paging:
+;     ; clear memory for page tables
+;     mov      edi, PML4_ADDRESS          ; starting address for paging struct
+;     xor      eax, eax                   ; value to write (0)
+;     mov      ecx, 16384                 ; clear 64kb
+;     rep      stosd                      ; repeat store double word
+
+;     ; setup 4-level paging hierarchy
+;     mov      edi, PML4_ADDRESS          ; Fixed typo here
+;     mov      dword [edi], PDPT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
+;     mov      dword [edi+4], 0
+
+;     mov      edi, PDPT_ADDRESS
+;     mov      dword [edi], PD_ADDRESS | PAGE_PRESENT | PAGE_WRITE
+;     mov      dword [edi+4], 0
+
+;     mov      edi, PD_ADDRESS
+;     mov      dword [edi], PT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
+;     mov      dword [edi+4], 0
+
+;     ; setup identity mapping for first 2MB of memory
+;     mov      edi, PT_ADDRESS
+;     xor      ebx, ebx                   ; start at physical address 0
+;     ; mov      ecx, ENTRIES_PER_PT
+;     mov      ecx, 1024
+
+; .map_loop:
+;     mov      eax, ebx
+;     or       eax, PAGE_PRESENT | PAGE_WRITE
+;     mov      dword [edi], eax
+;     mov      dword [edi+4], 0
+
+;     add      ebx, PAGE_SIZE
+;     add      edi, PAGE_ENTRY_SIZE
+;     loop     .map_loop
+
+;     mov      eax, PML4_ADDRESS
+;     mov      cr3, eax
+
+;     mov      eax, cr3
+;     mov      cr3, eax
+
+;     ret
 
 ; .map_loop:
 ;     ; Map .text section (read-only, executable)
@@ -198,9 +278,9 @@ setup_paging:
 
 enable_long_mode:
     ; enable pae
-    mov      eax, cr4
-    or       eax, CR4_PAE               ; set pae bit
-    mov      cr4, eax
+    ; mov      eax, cr4
+    ; or       eax, CR4_PAE               ; set pae bit
+    ; mov      cr4, eax
 
     ; enable long mode in efer msr
     mov      ecx, EFER_MSR              ; efer msr
@@ -217,7 +297,8 @@ enable_long_mode:
 
 bits                 64
 long_mode_start:
-    xor      ax, ax
+    mov      ax, DATA64_SEG
+    ; xor      ax, ax
     mov      ds, ax                     ; data segment
     mov      es, ax                     ; extra segment
     mov      ss, ax                     ; stack segment

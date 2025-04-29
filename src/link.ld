@@ -1,32 +1,39 @@
-OUTPUT_FORMAT("elf64-x86-64")
 ENTRY(_start)
-phys = 0x100000;
-SECTIONS
-{
-  .text phys : AT(phys) {
-    code = .;
-    *(.text)
-    /* *(.rodata) */
-    . = ALIGN(4096);
+OUTPUT_FORMAT(elf64-x86-64)
+OUTPUT_ARCH(i386:x86-64)
+
+KERNEL_PHYS_START = 0x100000;
+
+SECTIONS {
+  . = KERNEL_PHYS_START;
+
+  .text : ALIGN(4K) {
+    *(.text.boot)
+    *(.text*)
   }
-  .rodata : AT(phys + (rodata - code))
-  {
-    rodata = .;
-    *(.rodata)
-    *(.rodata.*)
-    . = ALIGN(4096);
+
+  .rodata : ALIGN(4K) {
+    *(.rodata*)
   }
-  .data : AT(phys + (data - code))
-  {
-    data = .;
-    *(.data)
-    . = ALIGN(4096);
+
+  .data : ALIGN(4K) {
+    *(.data*)
   }
-  .bss : AT(phys + (bss - code))
-  {
-    bss = .;
-    *(.bss)
-    . = ALIGN(4096);
+
+  .bss : ALIGN(4K) {
+    *(COMMON)
+    *(.bss*)
+
+    . = ALIGN(16);
+    stack_bottom = .;
+    . += 16384;
+    stack_top = .;
   }
-  end = .;
+
+  /DISCARD/ : {
+    *(.comment)
+    *(.eh_frame*)
+  }
+
+  kernel_end = .;
 }

@@ -15,7 +15,7 @@ CFLAGS_COMMON = -Wall -Wextra -mno-red-zone -ffreestanding -fno-pic -fno-pie \
 								-fno-stack-protector -nostdlib -nostartfiles -fno-exceptions \
 								-Iinclude -fno-builtin -nodefaultlibs -mcmodel=kernel
 
-CFLAGS_DEBUG  = -O0 -fno-inline -fno-omit-frame-pointer -g -v
+CFLAGS_DEBUG  = -O0 -fno-inline -fno-omit-frame-pointer -g # -v
 
 # Select build type flags (default DEBUG)
 # TODO: Create a make release.
@@ -52,6 +52,14 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 
 $(STAGE1_BIN): $(BOOT)/stage1.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
+
+# $(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
+# 	@KERNEL_SIZE_BYTES=$$(stat -f%z $(KERNEL_BIN)); \
+	# 	KERNEL_SECTORS=$$(( ($$KERNEL_SIZE_BYTES + 511) / 512 )); \
+	# 	HEX_SECTORS=$$(printf "0x%x" $$KERNEL_SECTORS); \
+	# 	echo "Kernel size: $$KERNEL_SIZE_BYTES bytes ($$KERNEL_SECTORS sectors, $$HEX_SECTORS hex)"; \
+	# 	sed "s/KERNEL_SECTORS.*equ.*/KERNEL_SECTORS       equ $$HEX_SECTORS         ; number of sectors to read/" $(BOOT)/stage2.asm > $(BUILD)/stage2_mod.asm
+# 	$(ASM) -I$(BOOT)/ -f bin $(BUILD)/stage2_mod.asm -o $@
 
 $(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
