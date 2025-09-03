@@ -1,6 +1,10 @@
 bits                 16
 org                  0x8000             ; where stage2 loads
 
+; todo: check if long mode enable sequence is good. i feel ike it's everywhere the sequence (after protect ed mode)
+; todo: recheck the page-table for 64 bit entries
+; todo: i'm reading cr3 before the tables are even ready
+
 ; constants
 ; NULL_SEG             equ 0x00
 ; CODE_SEG             equ 0x08
@@ -29,6 +33,10 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
 KERNEL_SECTORS       equ 0x32           ; number of sectors to read
+
+;%ifndef KERNEL_SECTORS
+;%error "KERNEL_SECTORS not defined"
+;%endif
 
 ; bits                 16
 start:
@@ -107,7 +115,8 @@ protected_mode_start:
     mov      gs, ax
     mov      ss, ax
 
-    mov      esp, 0x90000               ; setup stack
+    mov      ebp, 0x90000               ; setup stack
+    mov      esp, ebp ; esp
 
     call     setup_paging
     call     enable_long_mode
