@@ -1,6 +1,6 @@
 bits                 64
-; section              .text
-section              .text.boot
+section              .text
+; section              .text.boot
 global               _start
 extern               kmain
 extern               stack_top
@@ -16,9 +16,9 @@ _start:
     ; rep stosb        ; zero out the BSS section
 
     ; Set up stack
-    mov      rsp, stack_top
-    mov      rbp, rsp
-    and      rsp, -16                   ; align the stack to 16 bytes
+    ;mov      rsp, stack_top
+    ;mov      rbp, rsp
+    ;and      rsp, -16                   ; align the stack to 16 bytes
 
     call     kmain                      ; jump to kernel main function
 

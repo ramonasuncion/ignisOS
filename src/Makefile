@@ -44,7 +44,7 @@ $(OBJ)/boot/%.o: $(BOOT)/%.asm
 	@mkdir -p $(dir $@)
 	$(ASM) -f elf64 $< -o $@
 
-$(KERNEL_ELF): $(OBJ)/boot/entry.o $(OBJ_FILES)
+$(KERNEL_ELF): $(OBJ)/boot/entry.o $(OBJ_FILES) # obj/kernel/entry.o obj/boot/entry.o #
 	$(LD) -o $@ $^ -T $(SRC)/link.ld -Map=$(BUILD)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF)
@@ -53,13 +53,14 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 $(STAGE1_BIN): $(BOOT)/stage1.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
 
-# $(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
-# 	@KERNEL_SIZE_BYTES=$$(stat -f%z $(KERNEL_BIN)); \
-	# 	KERNEL_SECTORS=$$(( ($$KERNEL_SIZE_BYTES + 511) / 512 )); \
-	# 	HEX_SECTORS=$$(printf "0x%x" $$KERNEL_SECTORS); \
-	# 	echo "Kernel size: $$KERNEL_SIZE_BYTES bytes ($$KERNEL_SECTORS sectors, $$HEX_SECTORS hex)"; \
-	# 	sed "s/KERNEL_SECTORS.*equ.*/KERNEL_SECTORS       equ $$HEX_SECTORS         ; number of sectors to read/" $(BOOT)/stage2.asm > $(BUILD)/stage2_mod.asm
-# 	$(ASM) -I$(BOOT)/ -f bin $(BUILD)/stage2_mod.asm -o $@
+# TODO: Use this to calculate the number of sectors
+# TODO: Change the disk_load functionality.
+
+#KERNEL_SIZE_BYTES := $(shell stat -c%s $(KERNEL_BIN))
+#KERNEL_SECTORS := $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 )))
+#$(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
+#	@echo "Kernel size: $(KERNEL_SIZE_BYTES) bytes ($(KERNEL_SECTORS) sectors)"
+#	$(ASM) -I$(BOOT)/ -D KERNEL_SECTORS=$(KERNEL_SECTORS) -f bin $(BOOT)/stage2.asm -o $@
 
 $(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
