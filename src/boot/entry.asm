@@ -1,28 +1,28 @@
-bits                 64
-section              .text
-; section              .text.boot
-global               _start
-extern               kmain
-extern               stack_top
+bits 64
+section .text
+global _start
+extern __bss_start
+extern __bss_end
+extern __stack_top
+extern kmain
 
 _start:
-    ; clear BSS section
-    ; extern bss
-    ; extern end
-    ; mov rdi, bss
-    ; mov rcx, end
-    ; sub rcx, rdi
-    ; xor rax, rax
-    ; rep stosb        ; zero out the BSS section
+   ; zero BSS
+    mov rdi, __bss_start
+    mov rcx, __bss_end
+    sub rcx, rdi
+    xor rax, rax
+    rep stosb
 
-    ; Set up stack
-    ;mov      rsp, stack_top
-    ;mov      rbp, rsp
-    ;and      rsp, -16                   ; align the stack to 16 bytes
+    ; set up stack
+    mov rsp, __stack_top
+    and rsp, -16     ; align to 16 bytes
+    xor rbp, rbp
 
-    call     kmain                      ; jump to kernel main function
+    ; jump to kernel C entry
+    call kmain
 
 .hang:
     hlt
-    jmp      .hang
+    jmp .hang
 

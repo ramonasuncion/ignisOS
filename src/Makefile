@@ -11,11 +11,11 @@ BOOT      = boot
 SRC       = .
 IMG       = $(BUILD)/ignis.img
 
-CFLAGS_COMMON = -Wall -Wextra -mno-red-zone -ffreestanding -fno-pic -fno-pie \
-								-fno-stack-protector -nostdlib -nostartfiles -fno-exceptions \
-								-Iinclude -fno-builtin -nodefaultlibs -mcmodel=kernel
+CFLAGS_COMMON = -Wall -Wextra -ffreestanding -fno-pic -fno-pie \
+								-mno-red-zone -fno-stack-protector -nostdlib -nostartfiles \
+								-mcmodel=kernel -Iinclude
 
-CFLAGS_DEBUG  = -O0 -fno-inline -fno-omit-frame-pointer -g # -v
+CFLAGS_DEBUG = -O0 -g -fno-omit-frame-pointer
 
 # Select build type flags (default DEBUG)
 # TODO: Create a make release.
@@ -42,9 +42,9 @@ $(OBJ)/%.o: %.c
 
 $(OBJ)/boot/%.o: $(BOOT)/%.asm
 	@mkdir -p $(dir $@)
-	$(ASM) -f elf64 $< -o $@
+	$(ASM) -f elf64 $< -o $@ # -l build/stage2.lst
 
-$(KERNEL_ELF): $(OBJ)/boot/entry.o $(OBJ_FILES) # obj/kernel/entry.o obj/boot/entry.o #
+$(KERNEL_ELF):  $(OBJ)/boot/entry.o $(OBJ_FILES) # obj/kernel/entry.o obj/boot/entry.o
 	$(LD) -o $@ $^ -T $(SRC)/link.ld -Map=$(BUILD)/kernel.map
 
 $(KERNEL_BIN): $(KERNEL_ELF)
@@ -53,17 +53,12 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 $(STAGE1_BIN): $(BOOT)/stage1.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
 
-# TODO: Use this to calculate the number of sectors
-# TODO: Change the disk_load functionality.
+KERNEL_SIZE_BYTES = $(shell stat -c%s $(KERNEL_BIN))
+KERNEL_SECTORS = $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 + 1)))
 
-#KERNEL_SIZE_BYTES := $(shell stat -c%s $(KERNEL_BIN))
-#KERNEL_SECTORS := $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 )))
-#$(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
-#	@echo "Kernel size: $(KERNEL_SIZE_BYTES) bytes ($(KERNEL_SECTORS) sectors)"
-#	$(ASM) -I$(BOOT)/ -D KERNEL_SECTORS=$(KERNEL_SECTORS) -f bin $(BOOT)/stage2.asm -o $@
-
-$(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
-	$(ASM) -I$(BOOT)/ -f bin $< -o $@
+$(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
+	@echo "Kernel size: $(KERNEL_SIZE_BYTES) bytes ($(KERNEL_SECTORS) sectors)"
+	$(ASM) -I$(BOOT)/ -D KERNEL_SECTORS=$(KERNEL_SECTORS) -f bin $(BOOT)/stage2.asm -o $@
 
 $(IMG): $(STAGE1_BIN) $(STAGE2_BIN) $(KERNEL_BIN)
 	dd if=/dev/zero of=$@ bs=512 count=2880
