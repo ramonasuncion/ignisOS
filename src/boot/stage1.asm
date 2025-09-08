@@ -21,20 +21,30 @@ start:
 
     call     enable_a20                 ; enable A20 gate for memory access above 1MB
 
-    ; setup buffer pointer
-    ; real mode 16 bit (segment:offset)
-    mov      ax, SECOND_STAGE_LOAD_ADDR >> 4
-    mov      es, ax
-    mov      bx, SECOND_STAGE_LOAD_ADDR & 0xF
+    ; ; setup buffer pointer
+    ; ; real mode 16 bit (segment:offset)
+    ; mov      ax, SECOND_STAGE_LOAD_ADDR >> 4
+    ; mov      es, ax
+    ; mov      bx, SECOND_STAGE_LOAD_ADDR & 0xF
 
-    ; setup BIOS registes
-    mov      al, SECOND_STAGE_SECTORS   ; number of sectors
-    mov      ch, 0                      ; cylinder 0
-    mov      cl, 2                      ; load sector 2
-    mov      dh, 0                      ; head 0
-    mov      dl, [boot_drive]           ; boot drive
+    ; ; setup BIOS registes
+    ; mov      al, SECOND_STAGE_SECTORS   ; number of sectors
+    ; mov      ch, 0                      ; cylinder 0
+    ; mov      cl, 2                      ; load sector 2
+    ; mov      dh, 0                      ; head 0
+    ; mov      dl, [boot_drive]           ; boot drive
 
+    ; call     disk_load
+
+    ; disk loading
+    mov      bx, SECOND_STAGE_LOAD_ADDR
+    mov      dh, SECOND_STAGE_SECTORS
+    ; 8 sectors * 512 bytes = 4,096 bytes (4K)
+    mov      dl, [boot_drive]
+    mov      cl, 0x02                   ; load sector 2
     call     disk_load
+
+    jmp      SECOND_STAGE_LOAD_ADDR
 
     jmp      0x0000:SECOND_STAGE_LOAD_ADDR
 

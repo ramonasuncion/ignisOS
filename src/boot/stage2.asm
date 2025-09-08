@@ -40,16 +40,18 @@ start:
     mov      si, .stage2_msg
     call     print_string
 
-    ;mov      ax, KERNEL_LOAD_ADDR
-    ;mov      es, ax
-    ;mov      di, 0
+    ; mov      al, KERNEL_SECTORS         ; number of sectors to read
+    ; mov      ch, 0                      ; cylinder 0
+    ; mov      dh, 0                      ; head 0
+    ; mov      cl, 9                      ; starting sector (sector 9)
+    ; mov      dl, [boot_drive]           ; boot drive number
+    ; call     disk_load
 
-    ;mov      al, KERNEL_SECTORS         ; number of sectors to read
-    ;mov      ch, 0                      ; cylinder 0
-    ;mov      dh, 0                      ; head 0
-    ;mov      cl, 9                      ; starting sector (sector 9)
-    ;mov      dl, [boot_drive]           ; boot drive number
-    ;call     disk_load
+    mov      bx, 0x9000                 ; temporary buffer
+    mov      dh, KERNEL_SECTORS         ; number of sectors to read
+    mov      dl, [boot_drive]           ; boot drive number
+    mov      cl, 0x09
+    call     disk_load
 
     mov      si, .kernel_loaded_msg
     call     print_string
@@ -233,12 +235,10 @@ long_mode_start:
     wbinvd                              ; flush caches
     mov      rsp, 0x90000               ; setup 64-bit stack
 
-
-    ; TODO: I'm I copying everything properly?
-    mov      rsi, 0x9000
-    mov      rdi, KERNEL_LOAD_ADDR
-    mov      rcx, KERNEL_SECTORS * 512
-    rep      movsb
+    mov      rsi, 0x9000                ; source (temp buffer)
+    mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
+    mov      rcx, KERNEL_SECTORS * 512  ; size in bytes (sectors * 512)
+    rep      movsb                      ; copy byte by byte
 
     mov      rax, KERNEL_LOAD_ADDR      ; load kernel (alredy copied to 1MB)
     call     rax                        ; jump to kernel entry point
@@ -249,4 +249,3 @@ long_mode_start:
 
 
 boot_drive db 0
-
