@@ -31,6 +31,17 @@ STAGE2_BIN= $(BUILD)/stage2.bin
 KERNEL_ELF= $(BUILD)/kernel.elf
 KERNEL_BIN= $(BUILD)/kernel.bin
 
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+    STAT_CMD = stat -c%s
+else ifeq ($(UNAME_S),Darwin)
+    STAT_CMD = stat -f%z
+endif
+
+KERNEL_SIZE_BYTES = $(shell $(STAT_CMD) $(KERNEL_BIN))
+KERNEL_SECTORS = $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 + 1)))
+
 all: $(IMG)
 
 $(BUILD):
@@ -53,10 +64,8 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 $(STAGE1_BIN): $(BOOT)/stage1.asm $(BOOT)/disk.asm $(BOOT)/print.asm | $(BUILD)
 	$(ASM) -I$(BOOT)/ -f bin $< -o $@
 
-KERNEL_SIZE_BYTES = $(shell stat -c%s $(KERNEL_BIN))
-KERNEL_SECTORS = $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 + 1)))
-
 $(STAGE2_BIN): $(BOOT)/stage2.asm $(BOOT)/disk.asm $(BOOT)/print.asm $(KERNEL_BIN) | $(BUILD)
+	@echo "Using the $(UNAME_S) stat command"
 	@echo "Kernel size: $(KERNEL_SIZE_BYTES) bytes ($(KERNEL_SECTORS) sectors)"
 	$(ASM) -I$(BOOT)/ -D KERNEL_SECTORS=$(KERNEL_SECTORS) -f bin $(BOOT)/stage2.asm -o $@
 
