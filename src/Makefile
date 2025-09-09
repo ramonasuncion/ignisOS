@@ -40,7 +40,7 @@ else ifeq ($(UNAME_S),Darwin)
 endif
 
 KERNEL_SIZE_BYTES = $(shell $(STAT_CMD) $(KERNEL_BIN))
-KERNEL_SECTORS = $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 + 1)))
+KERNEL_SECTORS = $(shell printf "%d" $$(( ( $(KERNEL_SIZE_BYTES) + 511 ) / 512 )))
 
 all: $(IMG)
 

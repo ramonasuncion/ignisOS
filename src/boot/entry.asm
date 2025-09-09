@@ -7,12 +7,17 @@ extern __stack_top
 extern kmain
 
 _start:
-   ; zero BSS
-    mov rdi, __bss_start
-    mov rcx, __bss_end
-    sub rcx, rdi
-    xor rax, rax
-    rep stosb
+    ; zero BSS
+     mov rdi, __bss_start
+     mov rdx, __bss_end
+     cmp rdx, rdi
+     jbe .no_bss_clear    ; if end <= start, skip clearing
+     sub rdx, rdi         ; rdx = size
+     mov rcx, rdx
+     xor rax, rax
+     cld
+     rep stosb
+.no_bss_clear:
 
     ; set up stack
     mov rsp, __stack_top

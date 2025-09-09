@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <arch/x86_64/io.h>
 
-volatile char *vga_ptr = (char*)VGA_MEMORY;
+volatile char *vga_ptr;
 unsigned int cursor_offset = 0;
-unsigned char current_attribute = VGA_WHITE_ON_BLACK;
+unsigned char current_attribute;
 
 static void vga_enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
 {
@@ -35,21 +35,21 @@ static void vga_update_cursor(void)
 //   return pos;
 // }
 
-static void vga_set_cursor(int offset) {
-  offset /= 2;
-  outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
-  outb(VGA_DATA_REGISTER, (unsigned char) (offset >> 8));
-  outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
-  outb(VGA_DATA_REGISTER, (unsigned char) (offset & 0xff));
-}
+// static void vga_set_cursor(int offset) {
+//   offset /= 2;
+//   outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
+//   outb(VGA_DATA_REGISTER, (unsigned char) (offset >> 8));
+//   outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
+//   outb(VGA_DATA_REGISTER, (unsigned char) (offset & 0xff));
+// }
 
-static int vga_get_cursor() {
-  outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
-  int offset = inb(VGA_DATA_REGISTER) << 8;
-  outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
-  offset += inb(VGA_DATA_REGISTER);
-  return offset * 2;
-}
+// static int vga_get_cursor() {
+//   outb(VGA_CTRL_REGISTER, VGA_OFFSET_HIGH);
+//   int offset = inb(VGA_DATA_REGISTER) << 8;
+//   outb(VGA_CTRL_REGISTER, VGA_OFFSET_LOW);
+//   offset += inb(VGA_DATA_REGISTER);
+//   return offset * 2;
+// }
 
 static int get_row_from_offset(int offset)
 {
@@ -74,6 +74,11 @@ static int move_offset_to_new_line(int offset)
 
 void vga_init(void)
 {
+  /* avoid relying on static initializers */
+  vga_ptr = (volatile char*)VGA_MEMORY;
+  current_attribute = VGA_WHITE_ON_BLACK;
+  cursor_offset = 0;
+
   vga_clear();
   vga_enable_cursor(14, 15);
 }
@@ -114,7 +119,7 @@ void vga_set_char(int color, char ch, int offset)
 
 void kprint(const char *string)
 {
-  int offset = vga_get_cursor();
+  int offset = cursor_offset; // vga_get_cursor();
   int i = 0;
 
   while (string[i] != 0) {
@@ -127,7 +132,8 @@ void kprint(const char *string)
     i++;
   }
 
-  vga_set_cursor(offset);
+  cursor_offset = offset;
+  vga_update_cursor();
 }
 
 char digit_to_hex(uint8_t digit)
@@ -157,13 +163,15 @@ void kprint_hex(uint32_t number)
 
 void vga_putchar(char ch) 
 {
-    int offset = vga_get_cursor();
+    int offset = cursor_offset; // vga_get_cursor();
     if (ch == '\n') {
         offset = move_offset_to_new_line(offset);
     } else {
         set_char_at_video_memory(ch, offset);
         offset += 2;
     }
-    vga_set_cursor(offset);
+    cursor_offset = offset;
+    vga_update_cursor();
+    // vga_set_cursor(offset);
 }
 
