@@ -1,7 +1,7 @@
 import argparse
 import re
 
-DEBUG = True
+DEBUG = False
 TABSIZE = 4
 
 
@@ -21,6 +21,7 @@ def check_mixed_indentation(lines):
 
 
 def parse_instr(line, cmt_char=";"):
+    # type, indent_or_label, mnemonic, operands, comment
     indentation = len(line) - len(line.lstrip())
     s_line = line.strip()
 

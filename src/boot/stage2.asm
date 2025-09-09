@@ -1,12 +1,6 @@
 bits                 16
 org                  0x8000             ; where stage2 loads
 
-; constants
-NULL_SEG             equ 0x00
-CODE_SEG             equ 0x08
-CODE64_SEG           equ 0x18
-DATA_SEG             equ 0x10
-
 ; page table constants
 PAGE_PRESENT         equ (1 << 0)
 PAGE_WRITE           equ (1 << 1)
@@ -28,184 +22,232 @@ EFER_LME             equ (1 << 8)       ; long mode enable
 
 ; disk loading constants
 KERNEL_LOAD_ADDR     equ 0x100000       ; kernel location at 1 MB
-KERNEL_SECTORS       equ 0xA            ; number of sectors to read
 
-; ls -l build/kernel.bin # ceil(size / 512)
-; x86_64-elf-readelf -h build/kernel.elf | grep "Entry point"
-; x86_64-elf-nm build/kernel.elf | grep kmain
-; ls -l build/*.bin | awk '{sum += $5} END {print sum, "bytes used"}
-; x86_64-elf-nm build/kernel.elf
+%ifndef KERNEL_SECTORS
+%error "KERNEL_SECTORS not defined"
+%endif
 
 start:
-    xor      ax, ax                     ; zero ax
-    mov      ds, ax                     ; set up segments
+; real mode / 16-bit
+    xor      ax, ax
+    mov      ds, ax
     mov      es, ax
 
-    mov      si, stage2_msg
+    ; temp stack
+    mov      bp, 0x0500
+    mov      sp, bp
+
+    mov      si, .stage2_msg
     call     print_string
+
+    ; mov      al, KERNEL_SECTORS         ; number of sectors to read
+    ; mov      ch, 0                      ; cylinder 0
+    ; mov      dh, 0                      ; head 0
+    ; mov      cl, 9                      ; starting sector (sector 9)
+    ; mov      dl, [boot_drive]           ; boot drive number
+    
+    ; call     disk_load
 
     mov      bx, 0x9000                 ; temporary buffer
     mov      dh, KERNEL_SECTORS         ; number of sectors to read
     mov      dl, [boot_drive]           ; boot drive number
-    mov      cl, 0x09
+    ; mov      cl, 0x09
+    mov      cl, 0x0A
     call     disk_load
-
-    mov      si, kernel_loaded_msg
+    
+    mov      si, .kernel_loaded_msg
     call     print_string
 
-    lgdt     [gdt_descriptor]           ; load gdt
-
-    cli                                 ; disable interrupts before mode switch
-
+    ; load gdt for 32-bit protected mode
+    lgdt     [gdt_descriptor32]
+    cli
     mov      eax, cr0
-    or       eax, 0x1                   ; set pe bit (bit 0) in cr0
+    or       eax, 1                     ; set PE bit
     mov      cr0, eax
 
-    jmp      CODE_SEG:protected_mode_start
+    jmp      CODE32_SEG:protected_mode_start
+
+.stage2_msg:
+    db       'IgnisOS stage 2 loaded...', 13, 10, 0
+
+.kernel_loaded_msg:
+    db       'Kernel loaded...', 13, 10, 0
 
 %include "disk.asm"
 %include "print.asm"
 
-    align    8
-gdt_start:
-    dq       0x0000000000000000         ; null descriptor
+align    8
+gdt_start32:
+    dd 0
+    dd 0
 
-gdt_code:
-    dw       0xFFFF                     ; limit low
-    dw       0x0000                     ; base low
-    db       0x00                       ; base mid
-    db       0x9A                       ; access byte: present, ring0, executable, readable
-    db       0xCF                       ; flags: granularity=1, 32-bit protected mode (D=1, L=0)
-    db       0x00                       ; base high
+gdt_code32:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0x9A
+    db 0xCF
+    db 0x00
 
-gdt_data:
-    dw       0xFFFF                     ; limit low
-    dw       0x0000                     ; base low
-    db       0x00                       ; base mid
-    db       0x92                       ; access: present, ring0, writable
-    db       0xCF                       ; flags: granularity=1, 32-bit (D=1)
-    db       0x00                       ; base high
+gdt_data32:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0x92
+    db 0xCF
+    db 0x00
 
-gdt_code64:
-    dw       0xFFFF                     ; limit low
-    dw       0x0000                     ; base low
-    db       0x00                       ; base mid
-    db       0x9A                       ; access byte: present, ring0, executable, readable
-    db       0xAF                       ; flags: granularity=1, L=1, D=0 (must be 0 for 64-bit)
-    db       0x00                       ; base high
+gdt_end32:
 
-gdt_end:
+gdt_descriptor32:
+    dw gdt_end32 - gdt_start32 - 1
+    dd gdt_start32
 
-gdt_descriptor:
-    dw       gdt_end - gdt_start - 1    ; size of gdt minus 1
-    dd       gdt_start                  ; address of gdt
 
-bits                 32
+CODE32_SEG: equ gdt_code32 - gdt_start32
+DATA32_SEG: equ gdt_data32 - gdt_start32
+
+bits 32
 protected_mode_start:
-    mov      ax, DATA_SEG
+    ; reload segments
+    mov      ax, DATA32_SEG
     mov      ds, ax
     mov      es, ax
     mov      fs, ax
     mov      gs, ax
     mov      ss, ax
 
-    mov      esp, 0x90000               ; setup stack
+    mov      ebp, 0x90000               ; setup stack
+    mov      esp, ebp
 
+    ; build page tages (identity map first 2 MiB)
     call     setup_paging
+
+    ; enable long mode (EFER.LME then CR0.PG)
     call     enable_long_mode
 
-    lgdt     [gdt_descriptor]           ; reload same gdt
-
+    ; load 64-bit GDT then jump to long mode start
+    lgdt     [gdt_descriptor64]
     jmp      CODE64_SEG:long_mode_start
 
+align 4
+gdt_start64:
+    dd 0
+    dd 0
+
+gdt_code64:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0x9A
+    db 0xAF
+    db 0x00
+
+gdt_data64:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0x92
+    db 0xA0
+    db 0x00
+
+gdt_end64:
+
+gdt_descriptor64:
+    dw gdt_end64 - gdt_start64 - 1
+    dd gdt_start64
+
+CODE64_SEG: equ gdt_code64 - gdt_start64
+DATA64_SEG: equ gdt_data64 - gdt_start64
+
 setup_paging:
-    ; clear memory for page tables
-    mov      edi, PML4_ADDRESS          ; starting address for paging struct
-    xor      eax, eax                   ; value to write (0)
-    mov      ecx, 16384                 ; clear 64kb
-    rep      stosd                      ; repeat store double word
+    pushad
 
-    ; setup 4-level paging hierarchy
+    ; clear 16KiB area at PML4_ADDRESS (PML4, PDPT, PD, PT) to zero
     mov      edi, PML4_ADDRESS
-    mov      dword [edi], PDPT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
+    xor      eax, eax
+    mov      ecx, 4096         ; 16KiB / 4 = 4096 dwords
+    rep      stosd
 
-    mov      edi, PDPT_ADDRESS
-    mov      dword [edi], PD_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
-
-    mov      edi, PD_ADDRESS
-    mov      dword [edi], PT_ADDRESS | PAGE_PRESENT | PAGE_WRITE
-    mov      dword [edi+4], 0
-
-    ; setup identity mapping for first 2MB of memory
     mov      edi, PT_ADDRESS
-    mov      ebx, PAGE_PRESENT | PAGE_WRITE
-    mov      ecx, ENTRIES_PER_PT
-
-.map:
-    mov      dword [edi], ebx
+    xor      ebx, ebx
+    mov      ecx, 512
+.fill_pt_loop:
+    mov      eax, ebx
+    or       eax, PAGE_PRESENT | PAGE_WRITE
+    mov      dword [edi], eax
     mov      dword [edi+4], 0
     add      ebx, PAGE_SIZE
     add      edi, PAGE_ENTRY_SIZE
-    loop     .map
+    loop     .fill_pt_loop
 
+    ; PD[0] -> PT (write low dword then high dword)
+    mov      eax, PT_ADDRESS
+    or       eax, PAGE_PRESENT | PAGE_WRITE
+    mov      dword [PD_ADDRESS], eax
+    mov      dword [PD_ADDRESS + 4], 0
+
+    ; PDPT[0] -> PD
+    mov      eax, PD_ADDRESS
+    or       eax, PAGE_PRESENT | PAGE_WRITE
+    mov      dword [PDPT_ADDRESS], eax
+    mov      dword [PDPT_ADDRESS + 4], 0
+
+    ; PML4[0] -> PDPT
+    mov      eax, PDPT_ADDRESS
+    or       eax, PAGE_PRESENT | PAGE_WRITE
+    mov      dword [PML4_ADDRESS], eax
+    mov      dword [PML4_ADDRESS + 4], 0
+
+    ; enable PAE (CR4.PAE)
+    mov      eax, cr4
+    or       eax, CR4_PAE
+    mov      cr4, eax
+
+    ; load CR3 with physical address of PML4
     mov      eax, PML4_ADDRESS
     mov      cr3, eax
+
+    popad
     ret
 
 enable_long_mode:
-    ; enable pae
-    mov      eax, cr4
-    or       eax, CR4_PAE               ; set pae bit
-    mov      cr4, eax
-
-    ; enable long mode in efer msr
+    ; ECX = MSR
     mov      ecx, EFER_MSR              ; efer msr
     rdmsr
     or       eax, EFER_LME              ; set lme bit
     wrmsr
 
-    ; enable paging to activate long mode
+    ; enable paging (CR0.PG)
     mov      eax, cr0
     or       eax, CR0_PG                ; set pg bit
     mov      cr0, eax
-
     ret
 
-bits                 64
+bits 64
 long_mode_start:
-    ; clear segment registers
-    xor      rax, rax
+    ; setup 64-bit segments
+    mov      ax, DATA64_SEG
     mov      ds, ax
     mov      es, ax
     mov      ss, ax
     mov      fs, ax
     mov      gs, ax
 
+    wbinvd                              ; flush caches
     mov      rsp, 0x90000               ; setup 64-bit stack
-
-    ; TODO:  don't enable the interrupts unless I set up a 64-bit IDT of course.
 
     mov      rsi, 0x9000                ; source (temp buffer)
     mov      rdi, KERNEL_LOAD_ADDR      ; destination (1MB)
     mov      rcx, KERNEL_SECTORS * 512  ; size in bytes (sectors * 512)
     rep      movsb                      ; copy byte by byte
 
-    mov      rax, KERNEL_LOAD_ADDR      ; load kernel
-    jmp      rax                        ; jump to kernel entry point
-
-    ; if kernel returns halt (?)
+    mov      rax, KERNEL_LOAD_ADDR      ; load kernel (alredy copied to 1MB)
+    call     rax                        ; jump to kernel entry point
 
 .hang:
     hlt                                 ; halt cpu
     jmp      .hang                      ; infinite loop
 
-stage2_msg:
-    db       'IgnisOS stage 2 loaded...', 13, 10, 0
-
-kernel_loaded_msg:
-    db       'Kernel loaded...', 13, 10, 0
 
 boot_drive db 0
-

@@ -1,23 +1,21 @@
 ENTRY(_start)
 OUTPUT_FORMAT("elf64-x86-64")
+
 SECTIONS
 {
-  . = 0x100000;    /* Kernel loads at 1MB */
+  . = 0x00100000;               /* 1 MB kernel load address */
 
-  .text : {
-    *(.text)
-  }
+  .text : { *(.text) }
+  .rodata : { *(.rodata) }
+  .data : { *(.data) }
 
-  .rodata : {
-    *(.rodata)
-  }
+  __bss_start = .;
+  .bss : { *(.bss COMMON) }
+  __bss_end = .;
 
-  .data : {
-    *(.data)
-  }
-
-  .bss : {
-    *(.bss)
-    *(COMMON)
-  }
+  . = ALIGN(16);
+  __stack_start = .;
+  . += 0x4000;                  /* 16 KiB stack */
+  __stack_top = .;
 }
+
