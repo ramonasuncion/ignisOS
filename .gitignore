@@ -1,2 +1,2 @@
-src/build/
-src/obj/
+**/*.DS_Store
+limine/
