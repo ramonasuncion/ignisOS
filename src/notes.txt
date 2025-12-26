@@ -1,1 +1,0 @@
-I don't need ELF headers becaus my kernel is linked to a fixed physicall address and I load the kernel from that same exact addrss. If I want position-indepdent loading or multiple segmenets scattered in memory then I use ELF parsing.
