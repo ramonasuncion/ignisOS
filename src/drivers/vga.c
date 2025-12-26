@@ -1,6 +1,7 @@
-#include <drivers/vga.h>
 #include <stdint.h>
-#include <arch/x86_64/io.h>
+
+#include "drivers/vga.h"
+#include "arch/x86_64/io.h"
 
 volatile char *vga_ptr;
 unsigned int cursor_offset = 0;
@@ -161,17 +162,17 @@ void kprint_hex(uint32_t number)
   kprint(buffer);
 }
 
-void vga_putchar(char ch) 
+void vga_putchar(char ch)
 {
-    int offset = cursor_offset; // vga_get_cursor();
-    if (ch == '\n') {
-        offset = move_offset_to_new_line(offset);
-    } else {
-        set_char_at_video_memory(ch, offset);
-        offset += 2;
-    }
-    cursor_offset = offset;
-    vga_update_cursor();
-    // vga_set_cursor(offset);
+  int offset = cursor_offset; // vga_get_cursor();
+  if (ch == '\n') {
+    offset = move_offset_to_new_line(offset);
+  } else {
+    set_char_at_video_memory(ch, offset);
+    offset += 2;
+  }
+  cursor_offset = offset;
+  vga_update_cursor();
+  // vga_set_cursor(offset);
 }
 
