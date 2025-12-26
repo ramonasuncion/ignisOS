@@ -1,0 +1,14 @@
+.DS_Store
+.git
+.gitignore
+obj
+iso_root
+build
+*.dSYM
+*.o
+*.img
+*.iso
+*.swp
+node_modules
+/.vscode
+/.idea
