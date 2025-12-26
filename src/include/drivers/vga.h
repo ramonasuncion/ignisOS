@@ -1,5 +1,4 @@
-#ifndef _VGA_H_
-#define _VGA_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -15,7 +14,7 @@ extern unsigned char current_attribute;
 #define VGA_OFFSET_LOW    0x0F
 #define VGA_OFFSET_HIGH   0x0E
 
-#define VGA_MEMORY 0xB8000
+#define VGA_MEMORY ((unsigned short*)0xB8000)
 #define VGA_WHITE_ON_BLACK 0x0F
 
 void vga_init(void);
@@ -28,5 +27,3 @@ void kprint(const char *string);
 void kprint_hex(uint32_t number);
 char digit_to_hex(uint8_t digit);
 void vga_putchar(char ch);
-
-#endif /* _VGA_H_ */
