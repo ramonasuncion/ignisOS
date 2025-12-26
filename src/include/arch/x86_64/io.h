@@ -1,8 +1,4 @@
-#ifndef _IO_H_
-#define _IO_H_
-
-// TODO: handle arch
-// https://wiki.osdev.org/Inline_Assembly/Examples
+#pragma once
 
 #include <stdint.h>
 
@@ -17,5 +13,3 @@ static inline uint8_t inb(uint16_t port)
   __asm__ volatile ("inb %w1, %b0" : "=a"(ret) : "Nd"(port) : "memory");
   return ret;
 }
-
-#endif /* _IO_H_ */
