@@ -42,9 +42,31 @@ void serial_write(const char *str)
   }
 }
 
+void serial_write_line(const char *str)
+{
+  serial_write(str);
+  serial_write("\r\n");
+}
+
 char serial_read()
 {
   while (serial_received() == 0);
   return inb(COM1_PORT);
 }
 
+void serial_write_hex(u64 value)
+{
+  const char hex_chars[] = "0123456789ABCDEF";
+  char buffer[19];
+
+  buffer[0] = '0';
+  buffer[1] = 'x';
+  buffer[18] = '\0';
+
+  for (int i = 17; i >= 2; --i) {
+    buffer[i] = hex_chars[value & 0xF];
+    value >>= 4;
+  }
+
+  serial_write(buffer);
+}
