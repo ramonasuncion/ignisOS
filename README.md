@@ -1,4 +1,4 @@
-# IgnisOS
+# mangoOS
 
 A hobby osdev project. I intend to develop a x64 monolithic OS.
 
@@ -48,7 +48,7 @@ If you don't want to install cross-compilers locally, you can build using Docker
 
 ## Limine Bootloader
 
-IgnisOS uses the [Limine boot protocol](https://codeberg.org/Limine/limine-protocol).
+mangoOS uses the [Limine boot protocol](https://codeberg.org/Limine/limine-protocol).
 
 ### Download Limine
 

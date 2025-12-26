@@ -10,7 +10,7 @@ OBJ       = obj
 SRC       = .
 
 BOOTLOADER_DIR ?= ../limine
-BOOT_NAME ?= ignisos
+BOOT_NAME ?= mangoos
 ISO_ROOT ?= iso
 ISO_FILE ?= $(BOOT_NAME).iso
 KERNEL_ISO_NAME ?= kernel.elf
