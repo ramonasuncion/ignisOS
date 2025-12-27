@@ -3,11 +3,11 @@
 ## 0.1.0 (April 21, 2025)
 
 - Support 64-bit x86 CPU architecture
-- Basic kernel to print 'Hello from Ignis'
+- Basic kernel to print 'Hello from Mango'
 - Two-stage bootloader:
-    - Stage 1 (512 bytes): Enables A20 gate, loads stage 2 from disk
-    - Stage 2: Sets up protected mode, paging, and transitions to long mode
-    - Loads kernel from disk to 1MB memory location
+  - Stage 1 (512 bytes): Enables A20 gate, loads stage 2 from disk
+  - Stage 2: Sets up protected mode, paging, and transitions to long mode
+  - Loads kernel from disk to 1MB memory location
 - Added color palette manipulation functions
 - Implemented cursor positioning and movement
 - Simple VGA text mode driver with background color support

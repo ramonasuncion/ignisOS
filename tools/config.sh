@@ -26,5 +26,5 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC_DIR="$PROJECT_ROOT/src"
 BUILD_DIR="$PROJECT_ROOT/build"
 TOOLS_DIR="$PROJECT_ROOT/tools"
-OS_NAME="ignis"
+OS_NAME="mango"
 

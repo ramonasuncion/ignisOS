@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "kernel/types.h"
 
 #define COM1_PORT 0x3F8
 
@@ -21,3 +22,5 @@
 
 int serial_init(void);
 void serial_write(const char *str);
+void serial_write_line(const char *str);
+void serial_write_hex(u64 value);

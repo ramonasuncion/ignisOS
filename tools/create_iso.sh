@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BOOTLOADER_DIR=${BOOTLOADER_DIR:-../limine}
-BOOT_NAME=${BOOT_NAME:-ignisos}
+BOOT_NAME=${BOOT_NAME:-mangoos}
 ISO_ROOT=${ISO_ROOT:-iso_root}
 ISO_FILE=${ISO_FILE:-${BOOT_NAME}.iso}
 KERNEL_ISO_NAME=${KERNEL_ISO_NAME:-kernel.elf}
