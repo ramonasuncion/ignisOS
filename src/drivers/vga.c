@@ -175,4 +175,3 @@ void vga_putchar(char ch)
   vga_update_cursor();
   // vga_set_cursor(offset);
 }
-
