@@ -4,4 +4,4 @@
 
 #define panic(msg) _panic(msg, __FILE__, __LINE__)
 
-void _panic(const char *message, const char *file, u32 line);
+void __attribute__((noreturn)) _panic(const char *message, const char *file, u32 line);
