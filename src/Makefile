@@ -24,10 +24,10 @@ CFLAGS_BUILD ?= $(CFLAGS_DEBUG)
 CFLAGS = $(CFLAGS_COMMON) $(CFLAGS_BUILD)
 
 SRC_FILES = $(shell find $(SRC) -name '*.c')
-ASM_FILES = $(shell find $(SRC) -name '*.S')
+ASM_FILES = $(shell find $(SRC) -name '*.asm')
 
 OBJ_FILES = $(SRC_FILES:%.c=$(OBJ)/%.o)
-ASM_OBJ_FILES = $(ASM_FILES:%.S=$(OBJ)/%.o)
+ASM_OBJ_FILES = $(ASM_FILES:%.asm=$(OBJ)/%.o)
 ALL_OBJ_FILES = $(OBJ_FILES) $(ASM_OBJ_FILES)
 
 KERNEL_ELF = $(BUILD)/kernel.elf
@@ -44,7 +44,7 @@ $(OBJ)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ)/%.o: %.S
+$(OBJ)/%.o: %.asm
 	@mkdir -p $(dir $@)
 	$(ASM) -f elf64 $< -o $@
 
