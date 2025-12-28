@@ -57,16 +57,23 @@ char serial_read()
 void serial_write_hex(u64 value)
 {
   const char hex_chars[] = "0123456789ABCDEF";
-  char buffer[19];
+  char buffer[20];
+  int pos = 19;
 
-  buffer[0] = '0';
-  buffer[1] = 'x';
-  buffer[18] = '\0';
+  buffer[19] = '\0';
 
-  for (int i = 17; i >= 2; --i) {
-    buffer[i] = hex_chars[value & 0xF];
+  if (value == 0) {
+    serial_write("0x0");
+    return;
+  }
+
+  while (value > 0 && pos > 2) {
+    buffer[--pos] = hex_chars[value & 0xF];
     value >>= 4;
   }
 
-  serial_write(buffer);
+  buffer[pos - 1] = 'x';
+  buffer[pos - 2] = '0';
+
+  serial_write(buffer + pos - 2);
 }
