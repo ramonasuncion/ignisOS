@@ -2,3 +2,4 @@ iso_root/
 **/*.iso
 obj/
 build/
+kernel_symbols.txt
