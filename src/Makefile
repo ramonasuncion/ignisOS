@@ -50,6 +50,9 @@ $(OBJ)/%.o: %.asm
 
 $(KERNEL_ELF): $(ALL_OBJ_FILES) | $(BUILD)
 	$(LD) -o $@ $(ALL_OBJ_FILES) -T $(SRC)/link.ld
+# Debug build - extract symbols for debugging
+$(BUILD)/kernel_symbols.txt: $(KERNEL_ELF)
+	@x86_64-elf-nm -C $< | grep ' [Tt]' > $@
 
 $(KERNEL_BIN): $(KERNEL_ELF)
 	$(OBJCOPY) -O binary $< $@
