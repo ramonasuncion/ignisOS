@@ -30,5 +30,7 @@ void kmain(void)
     panic("No framebuffer!");
   }
 
+  int y = 3 / 0;
+
   panic("Halted");
 }

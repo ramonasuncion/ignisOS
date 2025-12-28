@@ -3,7 +3,7 @@
 
 void __attribute__((noreturn)) _panic(const char *message, const char *file, u32 line)
 {
-  asm volatile("cli");
+  __asm__ volatile("cli");
 
   serial_write("PANIC at ");
   serial_write(file);
